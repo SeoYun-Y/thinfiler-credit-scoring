@@ -1,0 +1,28 @@
+{
+  "logistic_regression": {
+    "val_auc": 0.7122018118312801,
+    "val_pr_auc": 0.11513041658188625
+  },
+  "xgboost": {
+    "val_auc": 0.7781995961322465,
+    "val_pr_auc": 0.17717750439063562
+  },
+  "target_positive_rate": 0.042281996572108155,
+  "n_train": 228712,
+  "n_val": 57178,
+  "n_thin_filers_scored": 44110,
+  "n_features": 67,
+  "top10_shap_features": [
+    "DAR",
+    "TOT_ASST",
+    "CPYT_FOOD_AMT_RT_was_missing",
+    "YOY_TOT_ASST_RTC",
+    "R3M_ITRT_ENT_BROADCAST",
+    "R6M_MART_AMT",
+    "JB_TP_420",
+    "PYE_AL012G019",
+    "PET_GD_woe",
+    "R12M_MED_AMT"
+  ],
+  "note": "씬파일러(apply) 점수는 정답이 없어 검증 불가. 참고자료로만 사용할 것."
+}
