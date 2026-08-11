@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>내 신용등급 · 트랙B</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div class="brand-text">
+          <div class="title">대안신용평가 심사지원</div>
+          <div class="subtitle">Track B · 통신카드CB결합</div>
+        </div>
+      </div>
+      <span class="track-badge">TRACK B</span>
+    </div>
+
+    <div class="user-strip">
+      <div style="font-size:13px;color:var(--text-dim);">
+        <span id="userIdLabel">SYN_235837</span>님, 안녕하세요
+      </div>
+      <button class="logout-btn" onclick="logout()">로그아웃</button>
+    </div>
+
+    <div class="warn-banner">
+      실험적 시연 화면입니다. 합성데이터 기반이며, 실제 등급 변동을 보장하지 않습니다.
+    </div>
+
+    <div class="gauge-card">
+      <div class="gauge-wrap">
+        <svg width="220" height="220" viewBox="0 0 220 220">
+          <circle cx="110" cy="110" r="96" fill="none" stroke="#2a2e36" stroke-width="14" />
+          <circle id="gaugeArc" cx="110" cy="110" r="96" fill="none" stroke="#5b9dff"
+                  stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="603.19" stroke-dashoffset="603.19" />
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-grade">5</div>
+          <div class="gauge-max">/ 9등급</div>
+        </div>
+      </div>
+      <div class="gauge-percentile">씬파일러 44,110명 중 상위 <b>16.2%</b></div>
+    </div>
+
+    <div class="section-title">📈 등급에 긍정적으로 작용한 요인</div>
+    <div class="section-desc">사실 기반 정보이며, 관리 여부와 무관하게 참고용이에요.</div>
+
+    <div class="factor-card">
+      <div class="factor-row">
+        <div class="factor-main">
+          <div class="factor-title">부채 비중이 낮은 편이에요</div>
+          <div class="factor-sub">자산 대비 부채 비중</div>
+        </div>
+        <span class="pill manageable">관리 가능</span>
+      </div>
+    </div>
+
+    <div class="factor-card">
+      <div class="factor-row">
+        <div class="factor-main">
+          <div class="factor-title">소비 패턴이 안정적이에요</div>
+          <div class="factor-sub">소비 카테고리 전년대비 증감률</div>
+        </div>
+        <span class="pill manageable">관리 가능</span>
+      </div>
+    </div>
+
+    <div class="factor-card">
+      <div class="factor-row">
+        <div class="factor-main">
+          <div class="factor-title">거주지가 안정적으로 유지되고 있어요</div>
+          <div class="factor-sub">자택주소 변경 이력</div>
+        </div>
+        <span class="pill observe">관찰 지표</span>
+      </div>
+    </div>
+
+    <div class="section-title">📉 등급에 부정적으로 작용한 요인</div>
+    <div class="section-desc">관리 가능 항목만 개선 방법을 제안해요. 관찰 지표는 참고용으로만 보여드려요.</div>
+
+    <div class="factor-card">
+      <div class="factor-row">
+        <div class="factor-main">
+          <div class="factor-title">최근 소비가 큰 폭으로 줄었어요</div>
+          <div class="factor-sub">전년 동기 대비 -24%</div>
+        </div>
+        <span class="pill manageable">관리 가능</span>
+      </div>
+      <button class="manage-toggle" onclick="this.nextElementSibling.classList.toggle('open')">관리 방법 보기</button>
+      <div class="manage-detail">
+        편의점·요식 등 일상 소비 카테고리를 이전 수준으로 서서히 회복하시면 소비 안정성 지표 개선에 도움이 될 수 있어요. 급격한 소비 변화보다는 완만한 패턴 유지가 유리해요.
+      </div>
+    </div>
+
+    <div class="factor-card">
+      <div class="factor-row">
+        <div class="factor-main">
+          <div class="factor-title">휴대폰 번호 변경이 잦았어요</div>
+          <div class="factor-sub">3년 내 변경 이력 기준</div>
+        </div>
+        <span class="pill observe">관찰 지표</span>
+      </div>
+    </div>
+
+    <div class="factor-card">
+      <div class="factor-row">
+        <div class="factor-main">
+          <div class="factor-title">일부 소비 카테고리 이용 정보가 없어요</div>
+          <div class="factor-sub">편의점·요식 카테고리 결측</div>
+        </div>
+        <span class="pill observe">관찰 지표</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    const session = requireRole("trackB");
+    if (session) {
+      document.getElementById("userIdLabel").textContent = session.userId;
+    }
+
+    // 게이지 애니메이션: grade=5, max=9
+    const grade = 5;
+    const maxGrade = 9;
+    const radius = 96;
+    const circumference = 2 * Math.PI * radius;
+    const arc = document.getElementById("gaugeArc");
+    arc.setAttribute("stroke-dasharray", circumference.toFixed(2));
+    const target = circumference * (1 - grade / maxGrade);
+    requestAnimationFrame(() => {
+      arc.style.transition = "stroke-dashoffset 1s ease";
+      arc.setAttribute("stroke-dashoffset", target.toFixed(2));
+    });
+  </script>
+</body>
+</html>

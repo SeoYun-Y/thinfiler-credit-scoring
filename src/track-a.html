@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>내 신용등급 · 트랙A</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div class="brand-text">
+          <div class="title">대안신용평가 심사지원</div>
+          <div class="subtitle">Track A · 개인CB</div>
+        </div>
+      </div>
+      <span class="track-badge">TRACK A</span>
+    </div>
+
+    <div class="user-strip">
+      <div style="font-size:13px;color:var(--text-dim);">
+        <span id="userIdLabel">트랙A 씬파일러</span>님, 안녕하세요
+      </div>
+      <button class="logout-btn" onclick="logout()">로그아웃</button>
+    </div>
+
+    <div class="warn-banner">
+      실험적 시연 화면입니다. 합성데이터 기반이며, 실제 등급 변동을 보장하지 않습니다.
+    </div>
+
+    <div class="info-banner">
+      Track A(개인CB) 대안변수 데이터는 아직 반영 전이에요. 실제 변수 목록이 입력되면 이 화면에 자동으로 채워질 예정입니다.
+    </div>
+
+    <div class="gauge-card">
+      <div class="gauge-wrap">
+        <svg width="220" height="220" viewBox="0 0 220 220">
+          <circle cx="110" cy="110" r="96" fill="none" stroke="#2a2e36" stroke-width="14" />
+          <circle cx="110" cy="110" r="96" fill="none" stroke="#454b57"
+                  stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="6 10" />
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-grade" style="color:var(--text-faint);">–</div>
+          <div class="gauge-max">/ 9등급</div>
+        </div>
+      </div>
+      <div class="gauge-percentile">데이터 준비 중</div>
+    </div>
+
+    <div class="section-title">📈 등급에 긍정적으로 작용할 요인 (예정)</div>
+    <div class="section-desc">Track A 대안변수 데이터가 입력되면 실제 요인으로 대체됩니다.</div>
+
+    <div class="placeholder-card">개인CB 기반 대안변수 항목이 여기에 표시될 예정이에요</div>
+    <div class="placeholder-card">개인CB 기반 대안변수 항목이 여기에 표시될 예정이에요</div>
+
+    <div class="section-title">📉 등급에 부정적으로 작용할 요인 (예정)</div>
+    <div class="section-desc">관리 가능 항목은 개선 방법 제안이 함께 표시될 예정이에요.</div>
+
+    <div class="placeholder-card">개인CB 기반 대안변수 항목이 여기에 표시될 예정이에요</div>
+    <div class="placeholder-card">개인CB 기반 대안변수 항목이 여기에 표시될 예정이에요</div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    const session = requireRole("trackA");
+    if (session) {
+      document.getElementById("userIdLabel").textContent = session.displayName;
+    }
+  </script>
+</body>
+</html>
