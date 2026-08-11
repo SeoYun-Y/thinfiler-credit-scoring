@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>심사자 화면</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="examiner-shell">
+    <div class="examiner-card">
+      <div class="icon">🛠️</div>
+      <h1>심사자 화면은 준비 중이에요</h1>
+      <p>
+        심사자용 화면은 별도로 구현하고 계세요.<br />
+        해당 페이지가 완성되면 이 링크가 그 화면으로 연결됩니다.
+      </p>
+      <!--
+        페이지 URL이 확정되면 아래 EXAMINER_URL 값을 채워주세요.
+        값이 채워지면 로그인 시 자동으로 해당 주소로 이동합니다.
+      -->
+      <button class="logout-btn" onclick="logout()">로그아웃</button>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    const session = requireRole("examiner");
+
+    // 심사자 페이지 URL이 확정되면 여기에 입력하세요.
+    // 예: const EXAMINER_URL = "https://example.com/examiner-dashboard.html";
+    const EXAMINER_URL = "";
+
+    if (EXAMINER_URL) {
+      window.location.href = EXAMINER_URL;
+    }
+  </script>
+</body>
+</html>
