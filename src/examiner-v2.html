@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>대안신용평가 심사지원 · 심사자</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="examiner-v2.css" />
+</head>
+<body>
+  <div class="page">
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div class="brand-text">
+          <div class="title">대안신용평가 심사지원</div>
+          <div class="subtitle" id="trackSubtitle">Track B · 통신카드CB결합</div>
+        </div>
+      </div>
+      <span class="track-badge" id="trackBadge">TRACK B</span>
+    </div>
+
+    <div class="user-strip">
+      <div style="font-size:13px;color:var(--text-dim);">
+        심사자님, 안녕하세요
+      </div>
+      <button class="logout-btn" onclick="if(confirm('로그인 화면으로 이동할까요?')) window.location.href='index.html'">로그아웃</button>
+    </div>
+
+    <div class="warn-banner">
+      실험적 시연 화면입니다. 합성데이터 기반이며, 실제 등급 변동을 보장하지 않습니다.
+    </div>
+
+    <div class="track-toggle">
+      <button class="track-toggle-btn active" id="btnB"><span class="dot"></span>Track B · 통신카드CB결합</button>
+      <button class="track-toggle-btn" id="btnA"><span class="dot"></span>Track A · 개인CB</button>
+    </div>
+
+    <div class="applicant-switcher">
+      <div class="switcher-current" id="switcherCurrent">
+        <div class="switcher-current-left">
+          <div>
+            <p class="switcher-current-id" id="curId"></p>
+            <p class="switcher-current-sub" id="curSub"></p>
+          </div>
+          <span class="risk-pill" id="curRisk"></span>
+        </div>
+        <div class="switcher-arrow" id="switcherArrow">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </div>
+      <div class="switcher-list" id="switcherList">
+        <div class="switcher-list-inner" id="applicantGrid"></div>
+      </div>
+    </div>
+
+    <div id="page"></div>
+
+  </div>
+
+<script>
+const B = {
+  pop: '44,110', popLabel: '전체',
+  applicants: [
+    { id:'SYN_123786', grade:2, top:79.9, score:0.0710, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 거의 없어요',13.2],
+          ['자택주소 변경 이력','최근 3년간 이사가 거의 없어요',13.5],
+          ['총자산','자산 기록이 0원이에요',4.7]] },
+    { id:'SYN_175159', grade:3, top:57.4, score:0.1714, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','변경 빈도가 평균 수준이에요',59.3],
+          ['자택주소 변경 이력','이사 빈도가 평균 수준이에요',53.6],
+          ['총자산','110,628원 · 평균보다 낮은 편이에요',36.3]] },
+    { id:'SYN_235837', grade:5, top:16.2, score:0.4228, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',96.1],
+          ['자택주소 변경 이력','최근 3년간 이사가 잦은 편이에요',87.8],
+          ['총자산','자산 기록이 0원이에요',4.7]] },
+    { id:'SYN_285930', grade:6, top:7.5, score:0.5396, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','변경 빈도가 평균 수준이에요',59.3],
+          ['자택주소 변경 이력','최근 3년간 이사가 거의 없어요',13.5],
+          ['총자산','평균보다 많은 편이에요',73.6]] },
+    { id:'SYN_280928', grade:7, top:3.2, score:0.6500, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',96.1],
+          ['자택주소 변경 이력','이사 빈도가 평균 수준이에요',53.6],
+          ['총자산','111,406원 · 평균보다 낮은 편이에요',36.5]] },
+    { id:'SYN_157870', grade:8, top:0.7, score:0.7808, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',96.1],
+          ['자택주소 변경 이력','이사 빈도가 평균 수준이에요',53.6],
+          ['총자산','264,223원 · 평균보다 많은 편이에요',67.4]] }
+  ]
+};
+
+const A = {
+  pop: '794,773', popLabel: '전체',
+  applicants: [
+    { id:'TA_C9399E00', grade:1, top:98.6, score:0.0014, sub:'신규 진입자 · 은행대출 신규',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',71.9],
+          ['자택주소 변경 이력','최근 3년간 이사가 잦은 편이에요',70.2],
+          ['거주지 매매가','178,495원 · 시세가 낮은 편이에요',33.8],
+          ['현거주지 평형','평형이 평균보다 큰 편이에요',63.0]] },
+    { id:'TA_5AE19E5A', grade:3, top:76.7, score:0.0062, sub:'신규 진입자',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 적은 편이에요',24.0],
+          ['자택주소 변경 이력','최근 3년간 이사가 적은 편이에요',22.6],
+          ['거주지 매매가','173,031원 · 시세가 낮은 편이에요',33.3],
+          ['현거주지 평형','평형 정보가 없어요',null]] },
+    { id:'TA_66105227', grade:7, top:36.0, score:0.0190, sub:'신규 진입자',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',71.9],
+          ['자택주소 변경 이력','최근 3년간 이사가 잦은 편이에요',70.2],
+          ['거주지 매매가','995,130원 · 시세가 높은 편이에요',87.2],
+          ['현거주지 평형','평형 정보가 없어요',null]] },
+    { id:'TA_CDA6F99E', grade:9, top:8.4, score:0.0693, sub:'신규 진입자',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 적은 편이에요',24.0],
+          ['자택주소 변경 이력','최근 3년간 이사가 적은 편이에요',22.6],
+          ['거주지 매매가','271,468원 · 시세가 중간 수준이에요',51.5],
+          ['현거주지 평형','평형 정보가 없어요',null]] }
+  ]
+};
+
+let currentTrack = 'B';
+let currentIdx = 0;
+let switcherOpen = false;
+let verifyOpen = true;
+let guideOpen = true;
+
+function riskClass(g){ if(g<=3) return 'risk-low'; if(g<=6) return 'risk-mid'; return 'risk-high'; }
+function riskLabel(g){ if(g<=3) return '저위험'; if(g<=6) return '보통'; return '고위험'; }
+function stepClass(i, grade){
+  if(i !== grade) return '';
+  if(grade<=3) return 'active-low';
+  if(grade<=6) return 'active-mid';
+  return 'active-high';
+}
+
+function renderApplicantGrid(){
+  const data = currentTrack==='B' ? B : A;
+  const cur = data.applicants[currentIdx];
+
+  document.getElementById('curId').textContent = cur.id;
+  document.getElementById('curSub').textContent = cur.sub + ' · 다른 신청자 보기';
+  const riskEl = document.getElementById('curRisk');
+  riskEl.className = 'risk-pill ' + riskClass(cur.grade);
+  riskEl.textContent = riskLabel(cur.grade);
+
+  const grid = document.getElementById('applicantGrid');
+  var _gridHtml = '';
+  for (var _g=0; _g<data.applicants.length; _g++) {
+    var a2 = data.applicants[_g];
+    var sel = _g===currentIdx ? ' selected' : '';
+    _gridHtml += '<button class="applicant-card' + sel + '" data-idx="' + _g + '">' +
+      '<p class="id">' + a2.id + '</p>' +
+      '<p class="sub">' + a2.sub + '</p>' +
+      '<span class="risk-pill ' + riskClass(a2.grade) + '">' + riskLabel(a2.grade) + '</span>' +
+      '</button>';
+  }
+  grid.innerHTML = _gridHtml;
+  var _cards = document.querySelectorAll('.applicant-card');
+  for (var _i=0; _i<_cards.length; _i++) {
+    (function(btn){
+      btn.addEventListener('click', function(){
+        currentIdx = parseInt(btn.dataset.idx);
+        switcherOpen = false;
+        renderPage();
+      });
+    })(_cards[_i]);
+  }
+
+  document.getElementById('switcherList').classList.toggle('open', switcherOpen);
+  document.getElementById('switcherArrow').classList.toggle('open', switcherOpen);
+}
+
+document.getElementById('switcherCurrent').addEventListener('click', function(){
+  switcherOpen = !switcherOpen;
+  document.getElementById('switcherList').classList.toggle('open', switcherOpen);
+  document.getElementById('switcherArrow').classList.toggle('open', switcherOpen);
+});
+
+function evCard(v){
+  const hasVal = v[2] !== null;
+  const bar = hasVal
+    ? '<p class="ev-pct">' + v[2] + '%</p><div class="ev-bar-track"><div class="ev-bar-fill" style="width:' + v[2] + '%;"></div></div>'
+    : '<span class="na-pill">해당없음</span>';
+  return '<div class="ev-card"><p class="ev-name">' + v[0] + '</p><p class="ev-desc">' + v[1] + '</p>' + bar + '</div>';
+}
+
+function barCol(val, h, accent){
+  return '<div class="barchart-col"><span class="barchart-val' + (accent?' accent':'') + '">' + val + '</span>' +
+    '<div class="barchart-bar" style="height:' + h + '%;' + (accent ? ' background:var(--blue);' : '') + '"></div></div>';
+}
+
+function renderPage(){
+  renderApplicantGrid();
+  const data = currentTrack==='B' ? B : A;
+  const a = data.applicants[currentIdx];
+  const scoreBarWidth = Math.min(a.score / 0.8 * 100, 100);
+  const posBarWidth = 100 - a.top;
+
+  let html = '';
+
+  // 1. 결과 요약
+  html += '<div class="panel">';
+  html += '<div class="panel-title-row"><span class="panel-num">1</span><h2 class="panel-title">결과 요약</h2></div>';
+  html += '<p class="switcher-current-id" style="font-size:16px;margin-bottom:6px;">' + a.id + '</p>';
+  html += '<div style="display:flex;gap:6px;margin-bottom:14px;">' +
+    '<span class="risk-pill" style="background:var(--card-alt);color:var(--text-dim);">' + a.sub + '</span>' +
+    '<span class="risk-pill" style="background:rgba(76,175,125,0.14);color:var(--green);">실제 데이터</span></div>';
+  html += '<p class="foot-note" style="margin-bottom:8px;">평가 등급</p>';
+  html += '<div class="steps">';
+  for(let i=1;i<=9;i++){ html += '<div class="step ' + stepClass(i, a.grade) + '">' + i + '</div>'; }
+  html += '</div>';
+  html += '<div class="steps-caption"><span>1 · 저위험</span><span>9 · 고위험</span></div>';
+  html += '<div class="metric-row"><span>모델 산출 점수</span><span class="val">' + a.score.toFixed(4) + '</span></div>';
+  html += '<div class="bar-track"><div class="bar-fill" style="width:' + scoreBarWidth + '%;"></div></div>';
+  html += '<p class="bar-caption">미보정 · 순위 용도</p>';
+  html += '<div class="metric-row"><span>전체 ' + data.pop + '명 중 위치</span><span class="val">상위 ' + a.top + '%</span></div>';
+  html += '<div class="bar-track"><div class="bar-fill" style="width:' + posBarWidth + '%;"></div></div>';
+  html += '<p class="bar-caption" style="margin-bottom:0;">확률이 아닌 상대적 순위</p>';
+  html += '</div>';
+
+  html += '<div class="callout" style="margin-bottom:16px;"><b>실제 값입니다.</b> ' +
+    (currentTrack==='B' ? 'track_b_thin_filer_grades_final.csv, track_b_features_apply_v2.csv 기준 실제 등급·점수·근거입니다.' : 'track_a_apply.csv, track_a_apply_v2_scored_R.csv 기준 실제 등급·점수·근거입니다.') +
+    ' 최종 승인·거절은 심사자가 판단합니다.</div>';
+
+  // 2. 세부 진단
+  html += '<div class="panel">';
+  html += '<div class="panel-title-row"><span class="panel-num">2</span><h2 class="panel-title">세부 진단</h2></div>';
+  html += '<p class="foot-note" style="margin-bottom:12px;">어떤 대안변수가 이 등급에 영향을 줬는지 보여드려요.</p>';
+  var _evHtml2 = '';
+  for (var _ev=0; _ev<a.ev.length; _ev++) { _evHtml2 += evCard(a.ev[_ev]); }
+  html += '<div class="ev-grid">' + _evHtml2 + '</div>';
+  html += '<p class="foot-note">막대는 전체 대비 위치이며, 좋고 나쁨의 평가가 아니라 참고용 위치 정보입니다.' +
+    (currentTrack==='A' ? ' 현거주지평형이 결측(-9)인 경우 백분위 계산에서 제외했습니다.' : '') + '</p>';
+  html += '</div>';
+
+  // 3. 검증 근거
+  html += '<div class="panel">';
+  html += '<div class="panel-title-row collapsible" id="toggleVerify"><span class="panel-num">3</span><h2 class="panel-title">검증 근거<span class="panel-title-note">(전체 모델 기준, 신청자별로 변하지 않음)</span></h2>' +
+    '<div class="panel-toggle' + (verifyOpen ? ' open' : '') + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></div></div>';
+  html += '<div class="panel-body' + (verifyOpen ? ' open' : '') + '" id="bodyVerify">';
+  if(currentTrack==='B'){
+    html += '<div class="compare-row"><div class="metric-row"><span>기존 신용정보 26개</span><span>AUC 0.53 · p=0.297</span></div>' +
+      '<div class="compare-track"><div class="compare-fill" style="width:62%; background:var(--red); opacity:0.6;"></div><div class="compare-baseline"></div></div>' +
+      '<p class="bar-caption">0.5 포함 · 찍기와 구분 안 됨</p></div>';
+    html += '<div class="compare-row"><div class="metric-row"><span>대안변수 66개</span><span class="val">AUC 0.77 · p&lt;0.001</span></div>' +
+      '<div class="compare-track"><div class="compare-fill" style="width:84%; background:var(--green);"></div><div class="compare-baseline"></div></div>' +
+      '<p class="bar-caption" style="margin-bottom:0;">우연일 가능성 0/1000</p></div>';
+    html += '<div class="callout" style="background:var(--blue-dim);"><b style="color:var(--blue);">독립 검증(Track A)에서도 확인됨</b><br>' +
+      '<span style="color:var(--text-dim);">다른 데이터(실측 라벨 68,677명)·다른 변수 구성(10개)으로도 AUROC 0.690 확인. 숫자를 직접 비교하지 않습니다.</span></div>';
+  } else {
+    var stages = [['CB 완전정보','0.990',99,false],['진입정보 15개','0.860',86,false],['대안+인구','0.819',82,false],['성별만 제외','0.793',79,false],['대안변수만(공식)','0.690',69,true]];
+    var _barsHtml = '', _labelsHtml = '';
+    for (var _s=0; _s<stages.length; _s++) {
+      _barsHtml += barCol(stages[_s][1], stages[_s][2], stages[_s][3]);
+      _labelsHtml += '<span' + (stages[_s][3]?' class="accent"':'') + '>' + stages[_s][0] + '</span>';
+    }
+    html += '<div class="barchart">' + _barsHtml + '</div>';
+    html += '<div class="barchart-labels">' + _labelsHtml + '</div>';
+    html += '<p class="bar-caption">CI [0.646, 0.731] · 인구변수 완전 배제 조건에서도 AUROC가 0.5를 크게 상회합니다.</p>';
+    html += '<div class="callout" style="background:var(--blue-dim); margin-top:12px; margin-bottom:16px;"><b style="color:var(--blue);">독립 검증(Track B)에서도 확인됨</b><br>' +
+      '<span style="color:var(--text-dim);">정답 없는 씬파일러 집단(이탈 코호트)에서도 대안변수 66개로 AUC 0.77 확인. 숫자를 직접 비교하지 않습니다.</span></div>';
+    html += '<p class="foot-note" style="margin-bottom:8px;font-weight:700;color:var(--text);">엄격/비엄격 씬파일러 등급 비교</p>';
+    html += '<div class="seg-grid">' +
+      '<div class="seg-box"><p class="seg-label">엄격 씬파일러 · 순수 무이력</p><p class="seg-grade">3등급</p><p class="seg-n">중앙값 · 333,571명</p></div>' +
+      '<div class="seg-box"><p class="seg-label">비엄격 씬파일러 · 폐계좌 보유</p><p class="seg-grade">5등급</p><p class="seg-n">중앙값 · 461,202명</p></div></div>';
+    html += '<p class="foot-note">신용거래를 한 번도 안 한 사람이, 거래 후 계좌를 닫은 사람보다 오히려 더 저위험으로 나타났습니다. 지금 보고 있는 신청자 한 명이 아니라, 전체 집단을 두 그룹으로 나눈 통계입니다.</p>';
+  }
+  html += '</div></div>';
+
+  // 4. 활용 가이드
+  html += '<div class="panel">';
+  html += '<div class="panel-title-row collapsible" id="toggleGuide"><span class="panel-num">4</span><h2 class="panel-title">활용 가이드<span class="panel-title-note">(전체 모델 기준, 신청자별로 변하지 않음)</span></h2>' +
+    '<div class="panel-toggle' + (guideOpen ? ' open' : '') + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></div></div>';
+  html += '<div class="panel-body' + (guideOpen ? ' open' : '') + '" id="bodyGuide">';
+  if(currentTrack==='B'){
+    html += '<p class="foot-note" style="margin-bottom:10px;">위험군 분류 기준선</p>';
+    html += '<div class="cutoff-btns">' +
+      '<button class="cutoff-btn active" data-c="0">전체(1등급↑)</button>' +
+      '<button class="cutoff-btn" data-c="1">5등급 이상</button>' +
+      '<button class="cutoff-btn" data-c="2">9등급만</button></div>';
+    html += '<div class="stat-grid">' +
+      '<div class="stat-box"><p class="stat-label">위험군 비율</p><p class="stat-val" id="cRatio">100%</p></div>' +
+      '<div class="stat-box"><p class="stat-label">정밀도</p><p class="stat-val" id="cPrec">4.23%</p></div>' +
+      '<div class="stat-box"><p class="stat-label">재현율</p><p class="stat-val" id="cRec">100%</p></div></div>';
+    html += '<p class="foot-note">신용이력보유군 기준 수치이며, 씬파일러 실제 연체율은 확인 불가.</p>';
+  } else {
+    html += '<p class="foot-note" style="margin:0;">Track A는 조절 가능한 활용 도구가 없습니다. 개별 채점 대신 검증 근거로만 활용됩니다 — 관련 통계는 위 3번 검증 근거 섹션에서 확인하세요.</p>';
+  }
+  html += '</div></div>';
+
+  document.getElementById('page').innerHTML = html;
+
+  document.getElementById('toggleVerify').addEventListener('click', function(){
+    verifyOpen = !verifyOpen;
+    document.getElementById('bodyVerify').classList.toggle('open', verifyOpen);
+    this.querySelector('.panel-toggle').classList.toggle('open', verifyOpen);
+  });
+  document.getElementById('toggleGuide').addEventListener('click', function(){
+    guideOpen = !guideOpen;
+    document.getElementById('bodyGuide').classList.toggle('open', guideOpen);
+    this.querySelector('.panel-toggle').classList.toggle('open', guideOpen);
+  });
+
+  if(currentTrack==='B'){
+    var _cbtns = document.querySelectorAll('.cutoff-btn');
+    for (var _j=0; _j<_cbtns.length; _j++) {
+      (function(btn){
+        btn.addEventListener('click', function(){
+          var _all = document.querySelectorAll('.cutoff-btn');
+          for (var _k=0; _k<_all.length; _k++) { _all[_k].classList.remove('active'); }
+          btn.classList.add('active');
+          var cutoffs = [
+            { ratio:'100%', prec:'4.23%', rec:'100%' },
+            { ratio:'23%', prec:'13.38%', rec:'72.75%' },
+            { ratio:'1%', prec:'50.17%', rec:'11.87%' }
+          ];
+          var c = cutoffs[btn.dataset.c];
+          document.getElementById('cRatio').textContent = c.ratio;
+          document.getElementById('cPrec').textContent = c.prec;
+          document.getElementById('cRec').textContent = c.rec;
+        });
+      })(_cbtns[_j]);
+    }
+  }
+}
+
+document.getElementById('btnB').addEventListener('click', function(){
+  currentTrack = 'B'; currentIdx = 0; switcherOpen = false;
+  document.getElementById('btnB').classList.add('active');
+  document.getElementById('btnA').classList.remove('active');
+  document.getElementById('trackBadge').textContent = 'TRACK B';
+  document.getElementById('trackSubtitle').textContent = 'Track B · 통신카드CB결합';
+  renderPage();
+});
+document.getElementById('btnA').addEventListener('click', function(){
+  currentTrack = 'A'; currentIdx = 0; switcherOpen = false;
+  document.getElementById('btnA').classList.add('active');
+  document.getElementById('btnB').classList.remove('active');
+  document.getElementById('trackBadge').textContent = 'TRACK A';
+  document.getElementById('trackSubtitle').textContent = 'Track A · 개인CB';
+  renderPage();
+});
+
+renderPage();
+</script>
+</body>
+</html>
