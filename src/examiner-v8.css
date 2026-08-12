@@ -1,0 +1,571 @@
+/* ------------------------------------------------------------------
+   examiner.css
+   팀원 styles.css의 디자인 토큰(색상·라운드·폰트)을 그대로 이어받아,
+   심사자 전용 화면에만 필요한 컴포넌트를 추가로 정의합니다.
+   styles.css를 먼저 로드한 뒤 이 파일을 로드해야 합니다.
+------------------------------------------------------------------ */
+
+/* ---------- 트랙 전환 버튼 ---------- */
+.track-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.track-toggle-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.track-toggle-btn .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+
+.track-toggle-btn.active {
+  border-color: var(--blue);
+  background: var(--blue-dim);
+  color: var(--text);
+}
+
+.track-toggle-btn.active .dot {
+  background: var(--blue);
+}
+
+/* ---------- 신청자 스위처 (기본 접힘) ---------- */
+.applicant-switcher {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+
+.switcher-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  cursor: pointer;
+}
+
+.switcher-current-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switcher-current-id {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.switcher-current-sub {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin: 2px 0 0;
+}
+
+.switcher-arrow {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  transition: transform .15s;
+  flex-shrink: 0;
+}
+
+.switcher-arrow.open { transform: rotate(180deg); }
+
+.switcher-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .2s ease;
+  border-top: 1px solid var(--border);
+}
+
+.switcher-list.open {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.switcher-list-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 8px;
+  padding: 12px;
+}
+
+.applicant-card {
+  text-align: left;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card-alt);
+  cursor: pointer;
+}
+
+.applicant-card.selected {
+  border-color: var(--blue);
+}
+
+.applicant-card .id {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 3px;
+}
+
+.applicant-card .sub {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin: 0 0 7px;
+}
+
+/* 위험도 배지: 팀원의 .pill 계열과 톤을 맞추되 3단계 색상 구분 */
+.risk-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.risk-low { background: rgba(76, 175, 125, 0.14); color: var(--green); }
+.risk-mid { background: var(--amber-bg); color: var(--amber); }
+.risk-high { background: var(--red-bg); color: var(--red); }
+
+/* ---------- 패널 공통 (섹션 카드) ---------- */
+.panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.panel-title-row.collapsible {
+  cursor: pointer;
+  user-select: none;
+}
+
+.panel-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.panel-title-note {
+  font-size: 12px;
+  color: var(--text-faint);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.panel-toggle {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  transition: transform .15s;
+  flex-shrink: 0;
+}
+
+.panel-toggle.open { transform: rotate(180deg); }
+
+.panel-body { display: none; }
+.panel-body.open { display: block; }
+
+/* ---------- 결과요약: 등급 스텝필 ---------- */
+.steps {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  border-radius: 7px;
+  background: var(--card-alt);
+  color: var(--text-faint);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.step.active-low { background: var(--green); color: #0d2116; }
+.step.active-mid { background: var(--amber); color: #3a2a0c; }
+.step.active-high { background: var(--red); color: #3a1310; }
+
+.steps-caption {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-bottom: 18px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.metric-row .val { font-weight: 700; }
+
+.bar-track {
+  height: 8px;
+  background: var(--card-alt);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.bar-fill { height: 100%; border-radius: 4px; background: var(--blue); }
+
+.bar-caption {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-bottom: 16px;
+}
+
+.bar-caption:last-child { margin-bottom: 0; }
+
+/* ---------- 세부진단: 근거 카드 (팀원 factor-card 확장) ---------- */
+.ev-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ev-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 13px 15px;
+  background: var(--card);
+}
+
+.ev-name { font-size: 13px; font-weight: 700; margin: 0 0 4px; }
+.ev-desc { font-size: 12px; color: var(--text-faint); margin: 0 0 9px; }
+.ev-pct { font-size: 12px; color: var(--text-dim); text-align: right; margin: 0 0 4px; }
+
+.ev-bar-track {
+  height: 6px;
+  background: var(--card-alt);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ev-bar-fill { height: 100%; border-radius: 3px; background: var(--blue); }
+
+.na-pill {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--text-faint);
+  background: var(--card-alt);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.foot-note { font-size: 12px; color: var(--text-faint); margin: 0; }
+
+/* ---------- 검증근거: AUC 비교 막대 ---------- */
+.compare-row { margin-bottom: 18px; }
+
+.compare-track {
+  height: 10px;
+  background: var(--card-alt);
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.compare-fill { height: 100%; border-radius: 5px; }
+.compare-baseline {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+}
+
+.callout {
+  background: var(--card-alt);
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-size: 13px;
+}
+
+.callout b { font-weight: 700; }
+
+/* ---------- 검증근거: Track A 정보량 막대그래프 ---------- */
+.barchart {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  height: 140px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.barchart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.barchart-val { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; }
+.barchart-val.accent { font-size: 13px; color: var(--blue); font-weight: 700; }
+.barchart-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--card-alt); }
+
+.barchart-labels {
+  display: flex;
+  gap: 14px;
+  padding: 0 4px;
+  margin-bottom: 12px;
+}
+
+.barchart-labels span { flex: 1; text-align: center; font-size: 10px; color: var(--text-faint); }
+.barchart-labels span.accent { color: var(--blue); font-weight: 700; }
+
+/* ---------- 활용가이드: 컷오프 버튼 & 통계 ---------- */
+.cutoff-btns { display: flex; gap: 8px; margin-bottom: 14px; }
+
+.cutoff-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card-alt);
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cutoff-btn.active { border-color: var(--blue); background: var(--blue-dim); color: var(--text); }
+
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+
+.stat-box { background: var(--card-alt); border-radius: 10px; padding: 14px; }
+.stat-label { font-size: 12px; color: var(--text-faint); margin: 0 0 4px; }
+.stat-val { font-size: 22px; font-weight: 700; margin: 0; }
+
+/* ---------- 활용가이드: 엄격/비엄격 세그먼트 비교 ---------- */
+.seg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+.seg-box { background: var(--card-alt); border-radius: 10px; padding: 14px; }
+.seg-label { font-size: 12px; color: var(--text-faint); margin: 0 0 4px; }
+.seg-grade { font-size: 26px; font-weight: 800; margin: 0; color: var(--blue); }
+.seg-n { font-size: 12px; color: var(--text-faint); margin: 4px 0 0; }
+
+/* ---------- 완료 · 감사 로그 카드 ---------- */
+.audit-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--blue);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.audit-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue);
+  margin: 0 0 12px;
+}
+
+.kv-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.kv-row:last-child { border-bottom: none; }
+.kv-row .k { color: var(--text-faint); }
+.kv-row .v { font-weight: 700; }
+
+.ack-log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-faint);
+  padding: 6px 0;
+}
+
+.audit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.audit-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card-alt);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.audit-btn.primary {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #0d1117;
+}
+
+/* ---------- 다단계 심사 콘솔 (사이드바 + 스크린 전환) ---------- */
+.flow-shell {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-elevated);
+  min-height: 520px;
+}
+
+@media (max-width: 640px) {
+  .flow-shell { grid-template-columns: 1fr; }
+  .flow-sidebar { display: flex; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  .flow-sidebar .fstep { flex-shrink: 0; }
+}
+
+.flow-sidebar {
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  padding: 14px 10px;
+}
+
+.fstep {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 12.5px;
+  margin-bottom: 2px;
+}
+
+.fstep:hover { background: var(--card-alt); }
+.fstep.active { background: var(--blue-dim); color: var(--blue); font-weight: 700; }
+
+.fstep .fnum {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--card-alt); color: var(--text-faint);
+  font-size: 10.5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.fstep.active .fnum { background: var(--blue); color: #0d1117; }
+.fstep.visited .fnum { background: var(--green); color: #0d2116; }
+
+.flow-main { padding: 22px 24px; }
+
+.flow-crumb { font-size: 12px; color: var(--text-faint); margin-bottom: 4px; }
+.flow-crumb b { color: var(--text); font-weight: 700; }
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+.flow-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.queue-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.queue-card:hover { border-color: var(--blue); }
+
+.btn-secondary {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card-alt);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary-nav {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: var(--blue);
+  color: #0d1117;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}

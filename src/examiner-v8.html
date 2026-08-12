@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>대안신용평가 심사지원 · 심사자</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="examiner-v8.css" />
+</head>
+<body>
+  <div class="page">
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div class="brand-text">
+          <div class="title">대안신용평가 심사지원</div>
+          <div class="subtitle" id="trackSubtitle">Track B · 통신카드CB결합</div>
+        </div>
+      </div>
+      <span class="track-badge" id="trackBadge">TRACK B</span>
+    </div>
+
+    <div class="user-strip">
+      <div style="font-size:13px;color:var(--text-dim);">심사자님, 안녕하세요</div>
+      <button class="logout-btn" onclick="if(confirm('로그인 화면으로 이동할까요?')) window.location.href='index.html'">로그아웃</button>
+    </div>
+
+    <div class="warn-banner" style="margin-bottom:14px;">
+      실험적 시연 화면입니다. 합성데이터 기반이며, 실제 등급 변동을 보장하지 않습니다.
+    </div>
+
+    <div class="flow-shell">
+      <div class="flow-sidebar" id="flowSidebar"></div>
+      <div class="flow-main">
+        <div class="flow-crumb">심사 콘솔 / <b id="crumbTitle">심사 대기열</b></div>
+
+        <!-- 0. 심사 대기열 -->
+        <div class="screen" data-idx="0">
+          <h1 class="scr-title" style="font-size:20px;font-weight:700;margin:10px 0 4px;">심사 대기열</h1>
+          <p class="foot-note" style="margin-bottom:14px;">신청자를 클릭하면 개별 심사 화면으로 이동합니다.</p>
+          <div class="track-toggle">
+            <button class="track-toggle-btn active" id="btnB"><span class="dot"></span>Track B · 통신카드CB결합</button>
+            <button class="track-toggle-btn" id="btnA"><span class="dot"></span>Track A · 개인CB</button>
+          </div>
+          <div id="queueList"></div>
+        </div>
+
+        <!-- 1. 대안변수 리포트 -->
+        <div class="screen" data-idx="1">
+          <h1 class="scr-title" style="font-size:20px;font-weight:700;margin:10px 0 4px;">대안변수 리포트</h1>
+          <p class="foot-note" style="margin-bottom:14px;">어떤 대안변수가 이 신청자의 등급에 영향을 줬는지 보여드려요.</p>
+          <div id="evContent"></div>
+          <div class="flow-nav">
+            <button class="btn-secondary" onclick="goTo(0)">← 대기열로</button>
+            <button class="btn-primary-nav" onclick="goTo(2)">근거 · 신뢰도 보기 →</button>
+          </div>
+        </div>
+
+        <!-- 2. 근거·신뢰도 -->
+        <div class="screen" data-idx="2">
+          <h1 class="scr-title" style="font-size:20px;font-weight:700;margin:10px 0 4px;">근거 · 신뢰도</h1>
+          <p class="foot-note" style="margin-bottom:14px;">이 등급이 얼마나 검증됐는지 보여드려요.</p>
+          <div id="verifyContent"></div>
+          <div class="flow-nav">
+            <button class="btn-secondary" onclick="goTo(1)">← 대안변수 리포트로</button>
+            <button class="btn-primary-nav" onclick="goTo(3)">등급 · 최종판단으로 →</button>
+          </div>
+        </div>
+
+        <!-- 3. 등급·최종판단 -->
+        <div class="screen" data-idx="3">
+          <h1 class="scr-title" style="font-size:20px;font-weight:700;margin:10px 0 4px;">등급 · 최종 심사 판단</h1>
+          <div id="visitWarning"></div>
+          <div id="finalContent"></div>
+        </div>
+
+        <!-- 4. 완료·감사로그 -->
+        <div class="screen" data-idx="4">
+          <h1 class="scr-title" style="font-size:20px;font-weight:700;margin:10px 0 4px;">처리 완료 · 감사 로그</h1>
+          <p class="foot-note" style="margin-bottom:14px;">이 건의 판단 근거와 처리 이력이 기록되었습니다.</p>
+          <div id="auditContent"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+<script>
+const B = {
+  pop: '44,110', popLabel: '전체',
+  applicants: [
+    { id:'SYN_123786', grade:2, top:79.9, score:0.0710, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 거의 없어요',13.2],
+          ['자택주소 변경 이력','최근 3년간 이사가 거의 없어요',13.5],
+          ['총자산','자산 기록이 0원이에요',4.7]] },
+    { id:'SYN_175159', grade:3, top:57.4, score:0.1714, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','변경 빈도가 평균 수준이에요',59.3],
+          ['자택주소 변경 이력','이사 빈도가 평균 수준이에요',53.6],
+          ['총자산','110,628원 · 평균보다 낮은 편이에요',36.3]] },
+    { id:'SYN_235837', grade:5, top:16.2, score:0.4228, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',96.1],
+          ['자택주소 변경 이력','최근 3년간 이사가 잦은 편이에요',87.8],
+          ['총자산','자산 기록이 0원이에요',4.7]] },
+    { id:'SYN_285930', grade:6, top:7.5, score:0.5396, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','변경 빈도가 평균 수준이에요',59.3],
+          ['자택주소 변경 이력','최근 3년간 이사가 거의 없어요',13.5],
+          ['총자산','평균보다 많은 편이에요',73.6]] },
+    { id:'SYN_280928', grade:7, top:3.2, score:0.6500, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',96.1],
+          ['자택주소 변경 이력','이사 빈도가 평균 수준이에요',53.6],
+          ['총자산','111,406원 · 평균보다 낮은 편이에요',36.5]] },
+    { id:'SYN_157870', grade:8, top:0.7, score:0.7808, sub:'통신카드CB결합',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',96.1],
+          ['자택주소 변경 이력','이사 빈도가 평균 수준이에요',53.6],
+          ['총자산','264,223원 · 평균보다 많은 편이에요',67.4]] }
+  ]
+};
+const A = {
+  pop: '794,773', popLabel: '전체',
+  applicants: [
+    { id:'TA_C9399E00', grade:1, top:98.6, score:0.0014, sub:'신규 진입자 · 은행대출 신규',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',71.9],
+          ['자택주소 변경 이력','최근 3년간 이사가 잦은 편이에요',70.2],
+          ['거주지 매매가','178,495원 · 시세가 낮은 편이에요',33.8],
+          ['현거주지 평형','평형이 평균보다 큰 편이에요',63.0]] },
+    { id:'TA_5AE19E5A', grade:3, top:76.7, score:0.0062, sub:'신규 진입자',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 거의 없어요',24.0],
+          ['자택주소 변경 이력','최근 3년간 이사가 거의 없어요',22.6],
+          ['거주지 매매가','173,031원 · 시세가 낮은 편이에요',33.3],
+          ['현거주지 평형','평형 정보가 없어요',null]] },
+    { id:'TA_66105227', grade:7, top:36.0, score:0.0190, sub:'신규 진입자',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 잦은 편이에요',71.9],
+          ['자택주소 변경 이력','최근 3년간 이사가 잦은 편이에요',70.2],
+          ['거주지 매매가','995,130원 · 시세가 높은 편이에요',87.2],
+          ['현거주지 평형','평형 정보가 없어요',null]] },
+    { id:'TA_CDA6F99E', grade:9, top:8.4, score:0.0693, sub:'신규 진입자',
+      ev:[['휴대폰 번호 변경 이력','최근 3년간 변경이 거의 없어요',24.0],
+          ['자택주소 변경 이력','최근 3년간 이사가 거의 없어요',22.6],
+          ['거주지 매매가','271,468원 · 시세가 중간 수준이에요',51.5],
+          ['현거주지 평형','평형 정보가 없어요',null]] }
+  ]
+};
+
+let currentTrack = 'B';
+let currentIdx = 0;
+let currentScreen = 0;
+let visitedScreens = {}; // "track-idx" -> {1:true, 2:true, ...}
+let ackChecks = {};      // "track-idx" -> [bool,bool,bool,bool]
+let revealedJudgments = {}; // "track-idx" -> true
+let selectedDecision = null;
+
+function key(){ return currentTrack + '-' + currentIdx; }
+function curData(){ return currentTrack==='B' ? B : A; }
+function curApp(){ return curData().applicants[currentIdx]; }
+function riskClass(g){ if(g<=3) return 'risk-low'; if(g<=6) return 'risk-mid'; return 'risk-high'; }
+function riskLabel(g){ if(g<=3) return '저위험'; if(g<=6) return '보통'; return '고위험'; }
+function stepClass(i, grade){
+  if(i !== grade) return '';
+  if(grade<=3) return 'active-low';
+  if(grade<=6) return 'active-mid';
+  return 'active-high';
+}
+function escapeHtml(str){
+  if(!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function markVisited(i){
+  var k = key();
+  if(!visitedScreens[k]) visitedScreens[k] = {};
+  visitedScreens[k][i] = true;
+}
+
+var STEP_LABELS = ['심사 대기열','대안변수 리포트','근거 · 신뢰도','등급 · 최종판단','완료 · 감사로그'];
+
+function renderSidebar(){
+  var html = '';
+  for (var i=0;i<STEP_LABELS.length;i++){
+    var cls = 'fstep' + (i===currentScreen ? ' active' : '') + ((visitedScreens[key()] && visitedScreens[key()][i] && i!==currentScreen) ? ' visited' : '');
+    html += '<div class="' + cls + '" data-goto="' + i + '"><span class="fnum">' + i + '</span><span>' + STEP_LABELS[i] + '</span></div>';
+  }
+  document.getElementById('flowSidebar').innerHTML = html;
+  var items = document.querySelectorAll('.fstep');
+  for (var j=0;j<items.length;j++){
+    (function(el){
+      el.addEventListener('click', function(){ goTo(parseInt(el.dataset.goto)); });
+    })(items[j]);
+  }
+}
+
+function goTo(i){
+  currentScreen = i;
+  markVisited(i);
+  var screens = document.querySelectorAll('.screen');
+  for (var s=0;s<screens.length;s++){
+    screens[s].classList.toggle('active', parseInt(screens[s].dataset.idx) === i);
+  }
+  document.getElementById('crumbTitle').textContent = STEP_LABELS[i];
+  renderSidebar();
+  if(i===0) renderQueue();
+  if(i===1) renderEvidence();
+  if(i===2) renderVerify();
+  if(i===3) renderFinal();
+  if(i===4) renderAudit();
+  window.scrollTo({top: document.querySelector('.flow-shell').offsetTop - 20, behavior:'smooth'});
+}
+
+function selectApplicant(track, idx){
+  currentTrack = track;
+  currentIdx = idx;
+  document.getElementById('trackBadge').textContent = 'TRACK ' + track;
+  document.getElementById('trackSubtitle').textContent = track==='B' ? 'Track B · 통신카드CB결합' : 'Track A · 개인CB';
+  goTo(1);
+}
+
+function renderQueue(){
+  var data = curData();
+  var html = '';
+  for (var i=0;i<data.applicants.length;i++){
+    var a = data.applicants[i];
+    html += '<div class="queue-card" data-idx="' + i + '">' +
+      '<div><p style="font-size:14px;font-weight:700;margin:0 0 3px;">' + a.id + '</p>' +
+      '<p style="font-size:12px;color:var(--text-faint);margin:0;">' + a.sub + ' · 상위 ' + a.top + '%</p></div>' +
+      '<span class="risk-pill ' + riskClass(a.grade) + '">' + a.grade + '등급 · ' + riskLabel(a.grade) + '</span>' +
+      '</div>';
+  }
+  document.getElementById('queueList').innerHTML = html;
+  var cards = document.querySelectorAll('.queue-card');
+  for (var c=0;c<cards.length;c++){
+    (function(el){
+      el.addEventListener('click', function(){ selectApplicant(currentTrack, parseInt(el.dataset.idx)); });
+    })(cards[c]);
+  }
+}
+
+document.getElementById('btnB').addEventListener('click', function(){
+  currentTrack='B';
+  document.getElementById('btnB').classList.add('active');
+  document.getElementById('btnA').classList.remove('active');
+  renderQueue();
+});
+document.getElementById('btnA').addEventListener('click', function(){
+  currentTrack='A';
+  document.getElementById('btnA').classList.add('active');
+  document.getElementById('btnB').classList.remove('active');
+  renderQueue();
+});
+
+function evCard(v){
+  var hasVal = v[2] !== null;
+  var bar = hasVal
+    ? '<p class="ev-pct">' + v[2] + '%</p><div class="ev-bar-track"><div class="ev-bar-fill" style="width:' + v[2] + '%;"></div></div>'
+    : '<span class="na-pill">해당없음</span>';
+  return '<div class="ev-card"><p class="ev-name">' + v[0] + '</p><p class="ev-desc">' + v[1] + '</p>' + bar + '</div>';
+}
+
+function renderEvidence(){
+  var a = curApp();
+  var html = '<p style="font-size:15px;font-weight:700;margin:0 0 10px;">' + a.id + '</p>';
+  var evHtml = '';
+  for (var i=0;i<a.ev.length;i++){ evHtml += evCard(a.ev[i]); }
+  html += '<div class="ev-grid">' + evHtml + '</div>';
+  html += '<p class="foot-note">막대는 전체 대비 위치이며, 좋고 나쁨의 평가가 아니라 참고용 위치 정보입니다.' +
+    (currentTrack==='A' ? ' 현거주지평형이 결측(-9)인 경우 백분위 계산에서 제외했습니다.' : '') + '</p>';
+  document.getElementById('evContent').innerHTML = html;
+}
+
+function barCol(val, h, accent){
+  return '<div class="barchart-col"><span class="barchart-val' + (accent?' accent':'') + '">' + val + '</span>' +
+    '<div class="barchart-bar" style="height:' + h + '%;' + (accent ? ' background:var(--blue);' : '') + '"></div></div>';
+}
+
+var ackTexts = [
+  '검증 대상은 모두 신용을 획득한 씬파일러 출신입니다. 잔류 씬파일러 점수는 외삽이며 실측 검증이 아닙니다 (선별효과).',
+  '표본 규모가 작아 신뢰구간이 넓습니다 (이탈 코호트 양성 39명 / Track A 양성 144건).',
+  '점수는 확률이 아니라 상대적 순위입니다. "9등급 = 연체 확률 90%"처럼 해석하면 안 됩니다.',
+  '합성데이터 기반 시연이며, 실제 등급 변동을 보장하지 않습니다.'
+];
+
+function renderVerify(){
+  var html = '';
+  if(currentTrack==='B'){
+    html += '<div class="compare-row"><div class="metric-row"><span>기존 신용정보 26개</span><span>AUC 0.53 · p=0.297</span></div>' +
+      '<div class="compare-track"><div class="compare-fill" style="width:62%; background:var(--red); opacity:0.6;"></div><div class="compare-baseline"></div></div>' +
+      '<p class="bar-caption">0.5 포함 · 찍기와 구분 안 됨</p></div>';
+    html += '<div class="compare-row"><div class="metric-row"><span>대안변수 66개</span><span class="val">AUC 0.77 · p&lt;0.001</span></div>' +
+      '<div class="compare-track"><div class="compare-fill" style="width:84%; background:var(--green);"></div><div class="compare-baseline"></div></div>' +
+      '<p class="bar-caption" style="margin-bottom:0;">우연일 가능성 0/1000</p></div>';
+    html += '<div class="callout" style="background:var(--blue-dim);"><b style="color:var(--blue);">독립 검증(Track A)에서도 확인됨</b><br>' +
+      '<span style="color:var(--text-dim);">다른 데이터(실측 라벨 68,677명)·다른 변수 구성(10개)으로도 AUROC 0.690 확인. 숫자를 직접 비교하지 않습니다.</span></div>';
+  } else {
+    var stages = [['CB 완전정보','0.990',99,false],['진입정보 15개','0.860',86,false],['대안+인구','0.819',82,false],['성별만 제외','0.793',79,false],['대안변수만(공식)','0.690',69,true]];
+    var barsHtml = '', labelsHtml = '';
+    for (var s=0;s<stages.length;s++){
+      barsHtml += barCol(stages[s][1], stages[s][2], stages[s][3]);
+      labelsHtml += '<span' + (stages[s][3]?' class="accent"':'') + '>' + stages[s][0] + '</span>';
+    }
+    html += '<div class="barchart">' + barsHtml + '</div><div class="barchart-labels">' + labelsHtml + '</div>';
+    html += '<p class="bar-caption">CI [0.646, 0.731] · 인구변수 완전 배제 조건에서도 AUROC가 0.5를 크게 상회합니다.</p>';
+    html += '<div class="callout" style="background:var(--blue-dim);margin-top:12px;margin-bottom:16px;"><b style="color:var(--blue);">독립 검증(Track B)에서도 확인됨</b><br>' +
+      '<span style="color:var(--text-dim);">정답 없는 씬파일러 집단(이탈 코호트)에서도 대안변수 66개로 AUC 0.77 확인. 숫자를 직접 비교하지 않습니다.</span></div>';
+    html += '<p class="foot-note" style="margin-bottom:8px;font-weight:700;color:var(--text);">엄격/비엄격 씬파일러 등급 비교</p>';
+    html += '<div class="seg-grid"><div class="seg-box"><p class="seg-label">엄격 씬파일러 · 순수 무이력</p><p class="seg-grade">3등급</p><p class="seg-n">중앙값 · 333,571명</p></div>' +
+      '<div class="seg-box"><p class="seg-label">비엄격 씬파일러 · 폐계좌 보유</p><p class="seg-grade">5등급</p><p class="seg-n">중앙값 · 461,202명</p></div></div>';
+    html += '<p class="foot-note">신용거래를 한 번도 안 한 사람이, 거래 후 계좌를 닫은 사람보다 오히려 더 저위험으로 나타났습니다.</p>';
+  }
+
+  var curAck = ackChecks[key()] || [false,false,false,false];
+  html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">';
+  html += '<p class="foot-note" style="margin-bottom:8px;font-weight:700;color:var(--text);">한계 고지 (모두 확인해야 다음으로 진행할 수 있어요)</p>';
+  for (var a2=0;a2<ackTexts.length;a2++){
+    html += '<label style="display:flex;gap:9px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;">' +
+      '<input type="checkbox" class="ackbox" data-a="' + a2 + '"' + (curAck[a2]?' checked':'') + ' style="margin-top:2px;flex-shrink:0;width:15px;height:15px;accent-color:var(--blue);">' +
+      '<span style="font-size:12.5px;color:var(--text-dim);line-height:1.5;">' + ackTexts[a2] + '</span></label>';
+  }
+  html += '</div>';
+
+  document.getElementById('verifyContent').innerHTML = html;
+
+  var boxes = document.querySelectorAll('.ackbox');
+  for (var b=0;b<boxes.length;b++){
+    (function(box){
+      box.addEventListener('change', function(){
+        var k = key();
+        if(!ackChecks[k]) ackChecks[k] = [false,false,false,false];
+        ackChecks[k][parseInt(box.dataset.a)] = box.checked;
+      });
+    })(boxes[b]);
+  }
+}
+
+function allAcked(){
+  var c = ackChecks[key()] || [false,false,false,false];
+  return c[0] && c[1] && c[2] && c[3];
+}
+
+function renderFinal(){
+  var a = curApp();
+  var data = curData();
+  var wbox = document.getElementById('visitWarning');
+  var v = visitedScreens[key()] || {};
+  var missed = [];
+  if(!v[1]) missed.push('대안변수 리포트');
+  if(!v[2]) missed.push('근거 · 신뢰도');
+  if(missed.length > 0){
+    wbox.innerHTML = '<div class="warn-banner" style="margin-bottom:14px;">⚠ ' + missed.join(', ') + ' 화면을 확인하지 않았습니다. 확인 후 진행해주세요.</div>';
+  } else if(!allAcked()){
+    wbox.innerHTML = '<div class="warn-banner" style="margin-bottom:14px;">근거 · 신뢰도 화면의 한계 고지를 모두 체크해야 판단을 제출할 수 있습니다.</div>';
+  } else {
+    wbox.innerHTML = '';
+  }
+
+  var canSubmit = v[1] && v[2] && allAcked();
+  var scoreBarWidth = Math.min(a.score / 0.8 * 100, 100);
+  var posBarWidth = 100 - a.top;
+
+  var html = '<div class="grid g2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">';
+  html += '<div>';
+  html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;text-align:center;">';
+  html += '<p class="foot-note" style="margin-bottom:6px;">예측 등급</p>';
+  html += '<p style="font-size:40px;font-weight:800;margin:0;color:' + (a.grade<=3?'var(--green)':a.grade<=6?'var(--amber)':'var(--red)') + ';">' + a.grade + '등급</p>';
+  html += '<span class="risk-pill ' + riskClass(a.grade) + '" style="margin-top:8px;display:inline-block;">' + riskLabel(a.grade) + '</span>';
+  html += '<p class="foot-note" style="margin-top:8px;">확률 아님 · 상대적 순위</p>';
+  html += '</div>';
+  if(currentTrack==='B'){
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">';
+    html += '<p class="foot-note" style="margin-bottom:8px;font-weight:700;color:var(--text);">컷오프 참고</p>';
+    html += '<table style="width:100%;font-size:12.5px;border-collapse:collapse;">';
+    html += '<tr style="color:var(--text-faint);"><th style="text-align:left;padding:6px 0;">컷오프</th><th style="text-align:right;">정밀도</th><th style="text-align:right;">재현율</th></tr>';
+    html += '<tr style="border-top:1px dashed var(--border);"><td style="padding:6px 0;">전원</td><td style="text-align:right;">4.23%</td><td style="text-align:right;">100%</td></tr>';
+    html += '<tr style="border-top:1px dashed var(--border);"><td style="padding:6px 0;">5등급+</td><td style="text-align:right;">13.38%</td><td style="text-align:right;">72.75%</td></tr>';
+    html += '<tr style="border-top:1px dashed var(--border);font-weight:700;"><td style="padding:6px 0;">9등급</td><td style="text-align:right;">50.17%</td><td style="text-align:right;">11.87%</td></tr>';
+    html += '</table></div>';
+  } else {
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">';
+    html += '<p class="foot-note" style="margin-bottom:8px;font-weight:700;color:var(--text);">모델 산출 점수</p>';
+    html += '<p style="font-size:22px;font-weight:700;margin:0 0 8px;">' + a.score.toFixed(4) + '</p>';
+    html += '<div class="bar-track"><div class="bar-fill" style="width:' + scoreBarWidth + '%;"></div></div>';
+    html += '<p class="foot-note" style="margin-top:8px;">전체 ' + data.pop + '명 중 상위 ' + a.top + '%</p>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  html += '<div>';
+  html += '<p style="font-weight:700;margin-bottom:8px;">심사 판단</p>';
+  html += '<div class="decision-btns" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">';
+  var decisions = ['승인','조건부승인','보류','거절'];
+  for (var d=0; d<decisions.length; d++){
+    html += '<label class="decision-radio" data-d="' + decisions[d] + '" style="display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13px;">' +
+      '<input type="radio" name="judgment" style="accent-color:var(--blue);"> ' + decisions[d] + '</label>';
+  }
+  html += '</div>';
+  html += '<label class="foot-note" style="display:block;margin-bottom:6px;">심사역 이름</label>';
+  html += '<input type="text" id="reviewerName" placeholder="예: 김태헌 심사역" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 11px;border-radius:10px;outline:none;box-sizing:border-box;margin-bottom:10px;">';
+  html += '<label class="foot-note" style="display:block;margin-bottom:6px;">심사 코멘트</label>';
+  html += '<textarea id="judgmentComment" rows="3" placeholder="판단 근거를 남겨주세요" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 11px;border-radius:10px;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;margin-bottom:12px;"></textarea>';
+  html += '<button id="submitJudgment"' + (canSubmit?'':' disabled') + ' style="width:100%;padding:11px;border-radius:10px;border:none;background:' + (canSubmit?'var(--blue)':'var(--card-alt)') + ';color:' + (canSubmit?'#0d1117':'var(--text-faint)') + ';font-size:13px;font-weight:700;cursor:' + (canSubmit?'pointer':'not-allowed') + ';">제출 →</button>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<div class="flow-nav"><button class="btn-secondary" onclick="goTo(2)">← 근거 · 신뢰도로</button><span></span></div>';
+
+  document.getElementById('finalContent').innerHTML = html;
+
+  var radios = document.querySelectorAll('.decision-radio');
+  for (var r=0;r<radios.length;r++){
+    (function(el){
+      el.addEventListener('click', function(){
+        for (var rr=0; rr<radios.length; rr++){ radios[rr].style.borderColor='var(--border)'; radios[rr].style.background='transparent'; }
+        el.style.borderColor='var(--blue)'; el.style.background='var(--blue-dim)';
+        el.querySelector('input').checked = true;
+        selectedDecision = el.dataset.d;
+      });
+    })(radios[r]);
+  }
+
+  var submitBtn = document.getElementById('submitJudgment');
+  submitBtn.addEventListener('click', function(){
+    if (submitBtn.disabled) return;
+    var reviewer = document.getElementById('reviewerName').value.trim();
+    var comment = document.getElementById('judgmentComment').value.trim();
+    if (!reviewer) { alert('심사역 이름을 입력해주세요.'); return; }
+    if (!selectedDecision) { alert('판단을 선택해주세요.'); return; }
+    var entry = { reviewer: reviewer, decision: selectedDecision, comment: comment, time: new Date().toLocaleString('ko-KR') };
+    var k = 'examinerJudgments::' + currentTrack + '::' + curApp().id;
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem(k) || '[]'); } catch(e) { list = []; }
+    list.unshift(entry);
+    localStorage.setItem(k, JSON.stringify(list));
+    revealedJudgments[key()] = true;
+    selectedDecision = null;
+    goTo(4);
+  });
+}
+
+function renderAudit(){
+  var a = curApp();
+  var jKey = 'examinerJudgments::' + currentTrack + '::' + a.id;
+  var history = [];
+  try { history = JSON.parse(localStorage.getItem(jKey) || '[]'); } catch(e) { history = []; }
+  var latest = history[0];
+
+  var html = '';
+  if(!latest){
+    html += '<p class="foot-note">아직 제출된 판단이 없습니다. 등급 · 최종판단 화면에서 먼저 판단을 제출해주세요.</p>';
+  } else {
+    var ackLabels = ['선별효과 확인','표본 규모 확인','순위일 뿐(확률 아님) 확인','합성데이터 확인'];
+    html += '<div class="audit-card">';
+    html += '<p class="audit-title">✓ 처리 완료 · 감사 로그</p>';
+    html += '<div class="kv-row"><span class="k">신청ID</span><span class="v">' + a.id + '</span></div>';
+    html += '<div class="kv-row"><span class="k">등급</span><span class="v">' + a.grade + '등급</span></div>';
+    html += '<div class="kv-row"><span class="k">판단</span><span class="v">' + escapeHtml(latest.decision) + '</span></div>';
+    html += '<div class="kv-row"><span class="k">처리 심사역</span><span class="v">' + escapeHtml(latest.reviewer) + '</span></div>';
+    html += '<div class="kv-row"><span class="k">제출 시각</span><span class="v">' + latest.time + '</span></div>';
+    html += '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">';
+    html += '<p class="foot-note" style="margin-bottom:4px;">확인한 한계 고지 (4/4)</p>';
+    for (var i=0;i<ackLabels.length;i++){
+      html += '<div class="ack-log-item"><span style="color:var(--green);flex-shrink:0;">✓</span><span>' + ackLabels[i] + '</span></div>';
+    }
+    html += '</div>';
+    html += '<div class="audit-actions"><button class="audit-btn" id="nextQueueBtn">다음 건으로</button><button class="audit-btn primary" id="printAuditBtn">인쇄 · PDF 저장</button></div>';
+    html += '</div>';
+
+    if(history.length > 1){
+      html += '<p class="foot-note" style="margin:16px 0 10px;font-weight:700;color:var(--text);">다른 심사위원 의견 (' + (history.length-1) + '건)</p>';
+      for (var h=1; h<history.length; h++){
+        var item = history[h];
+        html += '<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:var(--card-alt);">' +
+          '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">' +
+          '<span style="font-size:13px;font-weight:700;">' + escapeHtml(item.reviewer) + ' · ' + escapeHtml(item.decision) + '</span>' +
+          '<span style="font-size:11px;color:var(--text-faint);">' + item.time + '</span></div>' +
+          '<p style="font-size:12px;color:' + (item.comment?'var(--text-dim)':'var(--text-faint)') + ';margin:0;font-style:' + (item.comment?'normal':'italic') + ';">' + (item.comment?escapeHtml(item.comment):'코멘트 없음') + '</p></div>';
+      }
+    }
+  }
+  document.getElementById('auditContent').innerHTML = html;
+
+  var nextBtn = document.getElementById('nextQueueBtn');
+  if(nextBtn) nextBtn.addEventListener('click', function(){ goTo(0); });
+  var printBtn = document.getElementById('printAuditBtn');
+  if(printBtn) printBtn.addEventListener('click', function(){ window.print(); });
+}
+
+goTo(0);
+</script>
+</body>
+</html>
