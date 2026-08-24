@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>씬파일러 — 전체 클릭형 프로토타입 · 안심형</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{
+    --sage-1:#dfeee3; --sage-2:#cfe6df; --blue-1:#d7e6f2; --blue-2:#c3d9ec;
+    --bg:#eef4f6; --card:#ffffff; --ink:#28323a; --ink-soft:#5b6670; --ink-faint:#8b96a0;
+    --line: rgba(43,60,55,0.08);
+    --primary:#4f7f95; --primary-dark:#3a6378; --primary-soft:#e4eef1;
+    --positive:#3f8c5c; --positive-bg:#e3f1e6; --negative:#c8654f; --negative-bg:#faeae5;
+    --manage-bg:#dcefe1; --manage-ink:#357a53; --watch-bg:#edeff0; --watch-ink:#6b7680;
+    --radius-lg:26px; --radius-md:18px; --radius-pill:999px;
+    --shadow: 0 10px 30px rgba(35,55,48,0.08);
+    font-family:'Pretendard', -apple-system, "Apple SD Gothic Neo", sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ background:var(--bg); color:var(--ink); }
+  body{ padding: 28px 16px 80px; background:linear-gradient(180deg,#e6f0f4 0%,#eef4f2 45%,#f2f6f3 100%); background-attachment:fixed; }
+  .wrap{ max-width:1180px; margin:0 auto; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:11.5px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--primary); font-weight:700; margin-bottom:10px; }
+  .eyebrow::before{ content:""; width:16px; height:1px; background:var(--primary); display:inline-block; }
+  h1{ font-size:clamp(22px,3vw,30px); font-weight:800; letter-spacing:-0.01em; }
+  .sub{ margin-top:8px; color:var(--ink-soft); font-size:13.5px; line-height:1.7; max-width:680px; }
+  .meta-row{ margin-top:16px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .pill{ font-size:12px; background:var(--card); border:1px solid var(--line); padding:6px 12px; border-radius:var(--radius-pill); color:var(--ink-soft); }
+  .pill b{ color:var(--primary-dark); }
+
+  .control-row{ margin-top:18px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .toggle-group{ display:inline-flex; background:var(--card); border:1px solid var(--line);
+    border-radius:var(--radius-pill); padding:4px; gap:4px; box-shadow: var(--shadow); }
+  .toggle-btn{ border:none; background:transparent; padding:9px 16px; border-radius:var(--radius-pill);
+    font-size:12.5px; font-weight:700; color:var(--ink-faint); cursor:pointer; transition:.18s; white-space:nowrap; }
+  .toggle-btn.active{ background:var(--primary); color:#fff; }
+  .toggle-btn:not(.active):hover{ color:var(--ink); }
+  .home-btn{ border:1px solid var(--line); background:var(--card); border-radius:var(--radius-pill); padding:9px 16px;
+    font-size:12.5px; font-weight:700; color:var(--ink-soft); cursor:pointer; }
+  .home-btn:hover{ background:var(--primary-soft); color:var(--primary-dark); }
+
+  .rail-wrap{ margin-top:22px; }
+  .rail{ display:flex; gap:8px; overflow-x:auto; padding:4px 2px 14px; }
+  .rail::-webkit-scrollbar{ height:5px; }
+  .rail::-webkit-scrollbar-thumb{ background:var(--line); border-radius:10px; }
+  .chip{ flex:0 0 auto; min-width:92px; padding:9px 13px; border-radius:14px; cursor:pointer;
+    background:var(--card); border:1px solid var(--line); transition:.15s; }
+  .chip:hover{ transform:translateY(-1px); }
+  .chip .n{ font-size:10.5px; font-weight:700; color:var(--primary); }
+  .chip .l{ font-size:12.5px; font-weight:600; margin-top:2px; }
+  .chip.active{ background:var(--primary); border-color:var(--primary); }
+  .chip.active .n{ color:#dcebf0; } .chip.active .l{ color:#fff; }
+  .progress{ height:4px; background:var(--line); border-radius:4px; overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--primary); border-radius:4px; transition:width .25s; }
+
+  .stage{ margin-top:30px; display:flex; gap:36px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .phone{ width:340px; min-height:700px; background:linear-gradient(175deg,#fbfdfd 0%,#f3f8f7 100%); border-radius:40px; border:1px solid var(--line);
+    box-shadow: var(--shadow); padding:14px 14px 22px; position:relative; }
+  .statusbar{ display:flex; justify-content:space-between; align-items:center; padding:4px 6px 14px; font-size:13px; font-weight:600; color:var(--ink); }
+  .statusbar .icons{ display:flex; gap:5px; align-items:center; color:var(--ink-soft); font-size:11px; }
+  .screen{ padding: 2px 4px; }
+
+  .note-panel{ width:360px; background:var(--card); border-radius:var(--radius-lg); border:1px solid var(--line);
+    box-shadow: var(--shadow); padding:26px 26px 22px; }
+  .note-panel .tag{ display:inline-block; font-size:11.5px; font-weight:700; color:var(--primary); background:var(--primary-soft); padding:5px 11px; border-radius:var(--radius-pill); margin-bottom:12px; }
+  .note-panel h3{ font-size:19px; font-weight:800; margin-bottom:8px; }
+  .note-panel p{ font-size:13px; color:var(--ink-soft); line-height:1.7; margin-bottom:16px; }
+  .note-block{ border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:12px; }
+  .note-block .h{ font-size:12px; font-weight:700; color:var(--primary-dark); margin-bottom:8px; }
+  .note-block li{ list-style:none; font-size:12.5px; color:var(--ink-soft); line-height:1.9; }
+
+  .h1s{ font-size:21px; font-weight:800; line-height:1.35; margin-bottom:10px; }
+  .h1s em{ color:var(--primary); font-style:normal; }
+  .p1s{ font-size:13px; color:var(--ink-soft); line-height:1.7; margin-bottom:18px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius-md); padding:16px 18px; margin-bottom:12px; }
+  .card.tinted{ background:var(--primary-soft); border-color:transparent; }
+  .card.dark{ background:#2b3844; color:#fff; border:none; }
+  .card.dark .muted{ color:#a9b7c1; }
+  .card.clickable{ cursor:pointer; transition:.15s; }
+  .card.clickable:hover{ border-color:var(--primary); transform:translateY(-1px); }
+  .row-between{ display:flex; justify-content:space-between; align-items:baseline; }
+  .btn{ width:100%; padding:14px; border-radius:var(--radius-pill); border:none; font-size:14px; font-weight:700;
+    cursor:pointer; text-align:center; transition:.15s; }
+  .btn:active{ transform:scale(.98); }
+  .btn-primary{ background:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:var(--primary-dark); }
+  .btn-primary:disabled{ background:var(--line); color:var(--ink-faint); cursor:not-allowed; }
+  .btn-outline{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+  .btn-outline:hover{ background:var(--primary-soft); }
+  .btn-row{ display:flex; gap:8px; margin-top:16px; }
+  .btn-row .btn{ flex:1; }
+  .foot-note{ font-size:11px; color:var(--ink-faint); line-height:1.6; margin-top:14px; }
+  .badge{ display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:var(--radius-pill); }
+  .badge.manage{ background:var(--manage-bg); color:var(--manage-ink); }
+  .badge.watch{ background:var(--watch-bg); color:var(--watch-ink); }
+  .badge.done{ background:var(--primary-soft); color:var(--primary-dark); }
+  .pct-bar-track{ position:relative; background:var(--line); height:7px; border-radius:5px; margin-top:8px; overflow:visible; }
+  .pct-bar-fill{ height:100%; border-radius:5px; transition:width .2s; }
+  .pct-bar-mid{ position:absolute; top:-2px; left:50%; width:2px; height:11px; background:var(--ink-faint); opacity:.55; }
+  .pct-bar-labels{ display:flex; justify-content:space-between; font-size:9.5px; color:var(--ink-faint); margin-top:3px; }
+  .group-label{ font-size:12px; font-weight:700; color:var(--ink-faint); margin:18px 0 6px; text-transform:uppercase; letter-spacing:.02em; }
+  .group-label:first-of-type{ margin-top:6px; }
+  .reason-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:13px 0; border-bottom:1px solid var(--line); }
+  .reason-row:last-child{ border-bottom:none; }
+  .reason-row .t{ font-size:14px; font-weight:700; color:var(--ink); }
+  .reason-row .d{ font-size:12px; color:var(--ink-faint); margin-top:3px; }
+  .reason-row .v{ font-size:16px; font-weight:800; white-space:nowrap; }
+  .reason-row .v.pos{ color:var(--positive); }
+  .reason-row .v.neg{ color:var(--negative); }
+  .num-pos{ color:var(--positive); font-weight:800; } .num-neg{ color:var(--negative); font-weight:800; }
+  .step-item{ display:flex; gap:12px; align-items:flex-start; margin-bottom:14px; }
+  .step-num{ width:22px; height:22px; border-radius:50%; background:var(--primary-soft); color:var(--primary-dark);
+    font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .step-txt{ font-size:13px; color:var(--ink); line-height:1.6; }
+  .list-line{ display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--line); font-size:13px; }
+  .list-line:last-child{ border-bottom:none; }
+  .avail{ font-size:11px; font-weight:700; padding:4px 10px; border-radius:var(--radius-pill); background:var(--manage-bg); color:var(--manage-ink); }
+  .soon{ font-size:11px; font-weight:700; padding:4px 10px; border-radius:var(--radius-pill); background:var(--negative-bg); color:var(--negative); }
+  .inst-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0 16px; }
+  .inst-cell{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-soft); }
+  .inst-init{ width:22px; height:22px; border-radius:50%; background:var(--watch-bg); color:var(--ink-soft);
+    font-size:10.5px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .radio-card{ display:flex; justify-content:space-between; align-items:center; padding:15px 16px; border:1.5px solid var(--line);
+    border-radius:16px; margin-bottom:10px; cursor:pointer; transition:.15s; }
+  .radio-card.selected{ border-color:var(--primary); background:var(--primary-soft); }
+  .radio-card .t{ font-size:13.5px; font-weight:700; } .radio-card .d{ font-size:11.5px; color:var(--ink-faint); margin-top:2px; }
+  .radio-dot{ width:18px; height:18px; border-radius:50%; border:2px solid var(--line); flex:0 0 auto; position:relative; }
+  .radio-card.selected .radio-dot{ border-color:var(--primary); }
+  .radio-card.selected .radio-dot::after{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--primary); }
+  .check-line{ display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); cursor:pointer; }
+  .check-line:last-of-type{ border-bottom:none; }
+  .checkbox{ width:19px; height:19px; border-radius:6px; border:1.5px solid var(--line); flex:0 0 auto; margin-top:1px;
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; color:#fff; }
+  .checkbox.checked{ background:var(--primary); border-color:var(--primary); }
+  .check-body .t{ font-size:13px; font-weight:700; } .check-body .d{ font-size:11.5px; color:var(--ink-faint); margin-top:2px; }
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stat-box{ border:1px solid var(--line); border-radius:14px; padding:10px 12px; }
+  .stat-box .l{ font-size:11px; color:var(--ink-faint); } .stat-box .v{ font-size:13.5px; font-weight:800; margin-top:3px; }
+  .hist{ display:flex; align-items:flex-end; gap:5px; height:80px; margin:16px 0 6px; }
+  .hist .bar{ flex:1; background:var(--line); border-radius:6px 6px 2px 2px; position:relative; }
+  .hist .bar.me{ background:var(--primary); }
+  .hist .bar .tag{ position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:9.5px; font-weight:800; color:var(--primary-dark); white-space:nowrap; }
+  .grade-big{ display:flex; align-items:baseline; gap:6px; margin:14px 0 4px; }
+  .grade-big .n{ font-size:44px; font-weight:900; color:var(--primary-dark); line-height:1; }
+  .grade-big .u{ font-size:13px; color:var(--ink-faint); font-weight:700; }
+  .donut-wrap{ display:flex; align-items:center; gap:18px; margin:14px 0 8px; }
+  .legend{ font-size:12px; } .legend .li{ display:flex; align-items:center; gap:8px; padding:4px 0; }
+  .legend .dot{ width:9px; height:9px; border-radius:50%; } .legend .name{ color:var(--ink-soft); flex:1; } .legend .pct{ font-weight:700; }
+  .apply-list{ padding:0; max-height:520px; overflow-y:auto; }
+  .apply-row{ display:flex; align-items:center; gap:10px; padding:12px; border:1px solid var(--line); border-radius:14px; margin-bottom:8px; cursor:pointer; transition:.15s; }
+  .apply-row:hover{ border-color:var(--primary); }
+  .apply-row.active{ border-color:var(--primary); background:var(--primary-soft); }
+  .avatar{ width:32px; height:32px; border-radius:50%; background:var(--watch-bg); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:var(--ink-soft); }
+  .apply-row .info{ flex:1; } .apply-row .info .n{ font-size:13px; font-weight:700; } .apply-row .info .t{ font-size:11px; color:var(--ink-faint); margin-top:1px; }
+  .grade-chip{ font-size:11px; font-weight:800; padding:4px 10px; border-radius:var(--radius-pill); }
+  .grade-chip.g-lo{ background:var(--positive-bg); color:var(--positive); }
+  .grade-chip.g-mid{ background:#fdf1de; color:#a97a25; }
+  .grade-chip.g-hi{ background:var(--negative-bg); color:var(--negative); }
+  .caveat{ font-size:10.5px; color:var(--ink-faint); background:var(--watch-bg); border-radius:10px; padding:8px 10px; margin-top:10px; }
+  .bar-compare{ margin:10px 0 16px; }
+  .bar-compare .lbl{ display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px; }
+  .bar-track{ height:10px; background:var(--line); border-radius:6px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:6px; }
+  .decision-row{ display:flex; gap:8px; margin-top:6px; }
+  .decision-btn{ flex:1; padding:12px 6px; border-radius:14px; border:1.5px solid var(--line); background:#fff;
+    font-size:12.5px; font-weight:700; cursor:pointer; text-align:center; color:var(--ink-soft); }
+  .decision-btn.approve.sel{ background:var(--positive-bg); border-color:var(--positive); color:var(--positive); }
+  .decision-btn.hold.sel{ background:#fdf1de; border-color:#c99a3f; color:#a97a25; }
+  .decision-btn.reject.sel{ background:var(--negative-bg); border-color:var(--negative); color:var(--negative); }
+  .hero-login{ display:grid; grid-template-columns: 1.1fr 1fr; gap:0; border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow); }
+  .hero-left{ background:linear-gradient(150deg,var(--sage-2),var(--blue-2)); padding:44px 38px; color:#20342c; }
+  .hero-left .lg{ width:46px; height:46px; border-radius:14px; background:rgba(255,255,255,.55); display:flex; align-items:center; justify-content:center; margin-bottom:26px; }
+  .hero-left h2{ font-size:28px; font-weight:800; line-height:1.35; margin-bottom:14px; }
+  .hero-left h2 em{ font-style:normal; text-decoration: underline; text-decoration-color: rgba(32,52,44,.35); text-underline-offset:4px;}
+  .hero-left p{ font-size:13.5px; line-height:1.7; opacity:.85; max-width:360px; }
+  .hero-left .fine{ margin-top:80px; font-size:11px; opacity:.6; }
+  .hero-right{ background:#fff; padding:44px 38px; }
+  .hero-right h4{ font-size:17px; font-weight:800; margin-bottom:6px; }
+  .hero-right .d{ font-size:12.5px; color:var(--ink-soft); margin-bottom:22px; }
+  .role-card{ display:flex; align-items:center; gap:14px; padding:18px; border-radius:18px; border:1px solid var(--line);
+    margin-bottom:12px; cursor:pointer; transition:.15s; }
+  .role-card:hover{ border-color:var(--primary); transform:translateY(-1px); }
+  .role-card .ic{ width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex:0 0 auto; }
+  .role-card.personal .ic{ background:var(--primary-soft); color:var(--primary-dark); }
+  .role-card.examiner .ic{ background:#2b3844; color:#fff; }
+  .role-card .t{ font-size:14px; font-weight:800; } .role-card .d{ font-size:11.5px; color:var(--ink-faint); margin-top:2px; }
+  .role-card .arrow{ margin-left:auto; color:var(--ink-faint); }
+  .mini-toggle{ display:flex; gap:6px; flex-wrap:wrap; }
+  .mini-btn{ border:1px solid var(--line); background:#fff; color:var(--ink-soft); font-size:11px; font-weight:700;
+    padding:6px 11px; border-radius:var(--radius-pill); cursor:pointer; transition:.15s; }
+  .mini-btn:hover{ border-color:var(--primary); color:var(--primary-dark); }
+  .mini-btn.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
+  .side-link{ font-size:11px; color:var(--ink-faint); cursor:pointer; text-decoration:underline; }
+  .side-link:hover{ color:var(--primary-dark); }
+  .ex-input{ width:100%; border:1.5px solid var(--line); border-radius:14px; padding:12px 14px; font-size:13px;
+    font-family:inherit; color:var(--ink); background:#fff; }
+  .ex-input:focus{ outline:none; border-color:var(--primary); }
+  .ex-textarea{ resize:vertical; min-height:70px; line-height:1.6; }
+  .spinner{ animation: spin .9s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .dot-spin{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--primary); animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:.3; } 50%{ opacity:1; } }
+  @media (max-width: 760px){ .stage{ justify-content:center; } .note-panel{ width:100%; max-width:340px; } .hero-login{ grid-template-columns:1fr; } .hero-left{ padding:32px 26px; } .hero-right{ padding:32px 26px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>씬파일러 — 위험해서가 아니라, 정보가 없었을 뿐입니다.</h1>
+  <div class="sub">로그인에서 역할을 고르면 개인 진단 플로우 또는 심사자 콘솔로 이어져요. 실제 버튼을 눌러 화면을 넘기고, 화면 위쪽 칩으로 바로 이동할 수도 있어요.</div>
+
+  <div class="meta-row">
+    <span class="pill">대상 <b>씬파일러</b></span>
+    <span class="pill" id="metaAuc">모형 근거 <b>AUC 0.7739</b> · p&lt;0.001</span>
+    <span class="pill">포지셔닝 <b>심사 참고자료 · 자동승인 아님</b></span>
+  </div>
+
+  <div class="rail-wrap" id="railWrap">
+    <div class="rail" id="rail"></div>
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+</div>
+
+<script>
+/* ================= DATA ================= */
+const TRACKS = {
+  B: { key:'B', label:'Track B', totalPop:44110, popLabel:'44,110명 (통신·카드·CB 결합 씬파일러)',
+    auc:'0.7739', aucNote:'대안변수 66개 · p<0.001',
+    applicants:[
+      {id:'SYN_164838', grade:1, score:0.0245, pct:91.9},{id:'SYN_123786', grade:2, score:0.0710, pct:79.9},
+      {id:'SYN_175159', grade:3, score:0.1714, pct:57.4},{id:'SYN_161650', grade:4, score:0.3308, pct:28.1},
+      {id:'SYN_235837', grade:5, score:0.4228, pct:16.2},{id:'SYN_285930', grade:6, score:0.5396, pct:7.5},
+      {id:'SYN_280928', grade:7, score:0.6500, pct:3.2},{id:'SYN_157870', grade:8, score:0.7808, pct:0.7},
+      {id:'SYN_195157', grade:9, score:0.8946, pct:0.1},
+    ],
+    demoId:'SYN_235837',
+    dist:[10.23,19.74,25.26,22.31,12.53,4.77,3.97,0.96,0.23],
+    cutoffTable:[
+      {label:'전체(1등급 이상)', risk:'100%', prec:'4.23%', rec:'100%', use:'기준선'},
+      {label:'5등급 이상', risk:'23%', prec:'13.38%', rec:'72.75%', use:'보증기관 권장'},
+      {label:'9등급(최고위험만)', risk:'1%', prec:'50.17%', rec:'11.87%', use:'은행 권장'},
+    ],
+    existAuc:0.5265, existP:'p=0.297 · 0.5 포함 · 찍기와 구분 안 됨',
+    altAuc:0.7739, altP:'p<0.001 · 우연일 가능성 0/1000',
+    indepNote:'다른 데이터(실측 라벨 68,677명) · 다른 변수 구성(10개)으로 AUROC 0.690 확인. 숫자를 직접 비교하지 않습니다.',
+    factors:[
+      {name:'휴대폰 번호 변경 이력', code:'PYE_AL012G019', tag:'manage', pct:34, dir:'neg'},
+      {name:'자택주소 변경 이력', code:'PYE_AL012G005', tag:'watch', pct:41, dir:'neg'},
+      {name:'총자산', code:'TOT_ASST', tag:'watch', pct:22, dir:'pos'},
+      {name:'총자산 전년동기대비 증감률', code:'YOY_TOT_ASST_RTC', tag:'manage', pct:18, dir:'pos'},
+      {name:'미디어 콘텐츠 이용 지표(3개월)', code:'R3M_ITRT_ENT_BROADCAST', tag:'watch', pct:50, dir:'na'},
+      {name:'반려동물 소비 성향 지표', code:'PET_GD_woe', tag:'watch', pct:50, dir:'na'},
+    ],
+    donut:[ {name:'카드·소비패턴', pct:30.1, color:'#4f7f95'},{name:'통신 이용정보', pct:7.6, color:'#7fae8e'},
+      {name:'CB 비금융정보', pct:35.7, color:'#a9c9d6'},{name:'공공·기타', pct:26.6, color:'#d9e2df'} ],
+  },
+  A: { key:'A', label:'Track A', totalPop:68677, popLabel:'68,677명 (신규 신용진입자, 실측 라벨)',
+    auc:'0.690', aucNote:'변수 10개 · 95% CI [0.646, 0.731]',
+    applicants:[
+      {id:'TA_C9399E00', grade:1, score:0.0014, pct:98.6},{id:'82EDC843', grade:2, score:0.0026, pct:91.9},
+      {id:'TA_5AE19E5A', grade:3, score:0.0062, pct:76.7},{id:'D7332D0B', grade:4, score:0.0113, pct:53.3},
+      {id:'21BF53E7', grade:5, score:0.0129, pct:47.2},{id:'29A8ECD2', grade:6, score:0.0162, pct:39.9},
+      {id:'TA_66105227', grade:7, score:0.0190, pct:36.0},{id:'78D82BEF', grade:8, score:0.0378, pct:22.7},
+      {id:'000006AA', grade:9, score:0.130284, pct:1.9},
+    ],
+    demoId:'21BF53E7',
+    dist:null,
+    cutoffTable:null,
+    existAuc:null, existP:'확인 필요',
+    altAuc:0.690, altP:'p-value 확인 필요 (AUROC 95% CI [0.646, 0.731]만 확인됨)',
+    indepNote:'Track B와는 별개 데이터·별개 방법으로 독립 검증된 결과입니다. 두 트랙은 병합하거나 교차검증하지 않습니다.',
+    factors:[
+      {name:'휴대폰 번호 변경 이력', code:'AL012G019', tag:'manage', pct:31, dir:'neg'},
+      {name:'자택주소 변경 이력', code:'AL012G005', tag:'watch', pct:44, dir:'pos'},
+      {name:'직장 변경 이력', code:'AL012G011', tag:'watch', pct:37, dir:'neg'},
+      {name:'거주지 매매가', code:'U81301010', tag:'watch', pct:52, dir:'pos'},
+      {name:'거주지 전세가 구간', code:'U81306010', tag:'watch', pct:48, dir:'neg'},
+      {name:'현거주지 평형', code:'AS120G001', tag:'watch', pct:null, dir:'pos'},
+    ],
+    donut:[ {name:'거주 안정성', pct:8.7, color:'#4f7f95'},{name:'이력 변경패턴', pct:26.7, color:'#7fae8e'},
+      {name:'주거 자산정보', pct:64.6, color:'#a9c9d6'},{name:'기타', pct:0, color:'#d9e2df'} ],
+  }
+};
+
+function caveatsFor(t){
+  return [
+    '검증 대상은 모두 신용을 획득한 씬파일러 출신입니다. 잔류 씬파일러 점수는 외삽이며 실측 검증이 아닙니다 (선별효과).',
+    t.key==='B'
+      ? '표본 규모가 작아 신뢰구간이 넓습니다 (이탈 코호트 양성 39명).'
+      : '표본 규모가 작아 신뢰구간이 넓습니다 (신규 신용진입자 양성 144건).',
+    '점수는 확률이 아니라 상대적 순위입니다. "9등급 = 연체 확률 90%"처럼 해석하면 안 됩니다.',
+    '합성데이터 기반 시연이며, 실제 등급 변동을 보장하지 않습니다.',
+  ];
+}
+
+const P_SCREENS = [
+  {id:'p0', n:'P0', l:'본인인증'},
+  {id:'p1', n:'P1', l:'문제인식'}, {id:'p2', n:'P2', l:'동의·연동'}, {id:'p3', n:'P3', l:'분석'},
+  {id:'p4', n:'P4', l:'결과'}, {id:'p5', n:'P5', l:'근거'}, {id:'p6', n:'P6', l:'개선'}, {id:'p7', n:'P7', l:'전송'},
+  {id:'p7-1a', n:'P7-1', l:'은행 안내'}, {id:'p7-1b', n:'P7-1', l:'은행 전송'},
+  {id:'p7-2a', n:'P7-2', l:'재단 안내'}, {id:'p7-2b', n:'P7-2', l:'재단 전송'},
+  {id:'p7-3a', n:'P7-3', l:'카드 안내'}, {id:'p7-3b', n:'P7-3', l:'카드 전송'},
+  {id:'p8', n:'P8', l:'완료'},
+];
+const E_SCREENS = [
+  {id:'e0', n:'E0', l:'심사대기열'}, {id:'e1', n:'E1', l:'대안변수리포트'}, {id:'e2', n:'E2', l:'근거·신뢰도'},
+  {id:'e3', n:'E3', l:'등급·최종판단'}, {id:'e4', n:'E4', l:'완료·감사로그'},
+];
+
+let state = { flow:'login', screenIdx:0, track:'B', institution:null, personalAppIdx:4, examinerAppIdx:0,
+  caveats:[false,false,false,false], decision:null, submitted:false, examinerName:'', examinerReason:'', loadingStep:0,
+  completedIds: new Set() };
+let loadingTimer = null;
+
+function T(){ return TRACKS[state.track]; }
+function demo(){ return T().applicants[state.personalAppIdx]; }
+function pickPersonal(i){ state.personalAppIdx = i; jump('p1'); }
+function gradeClass(g){ return g<=3?'g-lo':(g<=6?'g-mid':'g-hi'); }
+const QUEUE_STATUS = ['신규 신청','대기중','대기중','대기중','대기중','대기중','대기중','대기중','대기중'];
+
+/* ================= NAV ================= */
+function goLogin(){ state.flow='login'; state.screenIdx=0; render(); }
+function choosePersonal(){ state.flow='personal'; state.screenIdx=0; state.loginPhase=0; render(); }
+function chooseExaminer(){ state.flow='examiner'; state.screenIdx=0; state.examinerAppIdx=0; state.caveats=[false,false,false,false]; state.decision=null; state.submitted=false; render(); }
+function switchFlow(f){ if(f==='personal') choosePersonal(); else chooseExaminer(); }
+function currentList(){ return state.flow==='examiner' ? E_SCREENS : P_SCREENS; }
+function jump(id){
+  const list = currentList();
+  const idx = list.findIndex(s=>s.id===id);
+  if(idx>=0){ state.screenIdx = idx; render(); }
+}
+function advance(){ const list=currentList(); state.screenIdx=Math.min(list.length-1, state.screenIdx+1); render(); }
+function back(){ if(state.screenIdx===0){ goLogin(); return; } state.screenIdx=Math.max(0,state.screenIdx-1); render(); }
+function setTrack(tr){ state.track = tr; render(); }
+function selectInst(v){ state.institution = v; render(); }
+function goInstitution(){ if(!state.institution) return; jump({bank:'p7-1a',fund:'p7-2a',card:'p7-3a'}[state.institution]); }
+function pickApplicant(i){ state.examinerAppIdx=i; state.caveats=[false,false,false,false]; state.decision=null; state.submitted=false; jump('e1'); }
+function toggleCaveat(i){ state.caveats[i]=!state.caveats[i]; render(); }
+function allCaveatsChecked(){ return state.caveats.every(Boolean); }
+function setDecision(d){ state.decision=d; jump('e4'); }
+function submitReview(){
+  if(!state.examinerName.trim() || !state.examinerReason.trim()) return;
+  state.submitted=true;
+  state.completedIds.add(T().applicants[state.examinerAppIdx].id);
+  render();
+}
+function printReport(){ window.print(); }
+
+/* ================= LOGIN SCREEN ================= */
+function renderLogin(){
+  return `
+  <div class="hero-login">
+    <div class="hero-left">
+      <div class="lg"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 14h4v6H4v-6zM10 8h4v12h-4V8zM16 3h4v17h-4V3z" fill="#20342c"/></svg></div>
+      <h2>신용이력이 없어도,<br><em>가능성은 데이터</em>로<br>보입니다</h2>
+      <p>씬파일러를 위한 대안신용평가를 검증·투명하게 심사하는 콘솔입니다. 개인은 바로 조회하고, 심사자는 콘솔로 로그인합니다.</p>
+      <div class="fine">실험적 시연 · 합성데이터 기반 · 실제 등급 변동을 보장하지 않음</div>
+    </div>
+    <div class="hero-right">
+      <h4>어떻게 이용하시나요?</h4>
+      <div class="d">지금은 ${T().label} 데모를 보고 있어요. 아래에서 언제든 바꿀 수 있어요.</div>
+      <div class="mini-toggle" id="trackToggleLogin" style="margin-bottom:18px;">
+        <button class="mini-btn ${state.track==='B'?'active':''}" data-track="B">Track B · 통신카드CB결합</button>
+        <button class="mini-btn ${state.track==='A'?'active':''}" data-track="A">Track A · 신용정보 기반</button>
+      </div>
+      <div class="role-card personal" onclick="choosePersonal()">
+        <div class="ic">나</div>
+        <div><div class="t">개인 신청자로 조회하기</div><div class="d">내 대안신용평가 결과 · 로그인 없이 시작</div></div>
+        <div class="arrow">→</div>
+      </div>
+      <div class="role-card examiner" onclick="chooseExaminer()">
+        <div class="ic">審</div>
+        <div><div class="t">심사자로 로그인</div><div class="d">심사 콘솔 · 5단계 워크플로우</div></div>
+        <div class="arrow">→</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ================= PERSONAL SCREENS ================= */
+function screenP0(){
+  const phase = state.loginPhase || 0;
+  if(phase === 0){
+    return `
+    <div class="h1s">휴대폰 번호로<br>시작해요</div>
+    <div class="p1s">본인 명의 휴대폰 번호로 간편하게 조회할 수 있어요. 별도 회원가입 없이 본인인증만으로 진행돼요.</div>
+    <div style="font-size:12.5px;font-weight:700;margin-bottom:6px;">휴대폰 번호</div>
+    <input id="phoneInput" type="text" class="ex-input" value="010-4821-5837" style="margin-bottom:22px;">
+    <div class="btn btn-primary" onclick="loginStepNext()">인증번호 받기</div>
+    <div class="foot-note">이 번호로 6자리 인증번호를 보내드려요.</div>
+    `;
+  }
+  return `
+  <div class="h1s">인증번호를<br>입력해주세요</div>
+  <div class="p1s">010-4821-5837로 전송된 6자리 번호를 입력해주세요.</div>
+  <input id="codeInput" type="text" class="ex-input" value="123456" style="margin-bottom:10px; letter-spacing:8px; font-weight:700; text-align:center;">
+  <div class="foot-note" style="margin-bottom:22px;">인증번호가 오지 않았다면 재전송할 수 있어요.</div>
+  <div class="btn btn-primary" onclick="jump('p1')">인증하고 조회하기 →</div>
+  <div class="btn btn-outline" style="margin-top:8px;" onclick="loginStepBack()">← 이전</div>
+  `;
+}
+function loginStepNext(){ state.loginPhase = 1; const el=document.querySelector('.phone .screen'); if(el) el.innerHTML = screenP0(); }
+function loginStepBack(){ state.loginPhase = 0; const el=document.querySelector('.phone .screen'); if(el) el.innerHTML = screenP0(); }
+function screenP1(){ return `
+  <div class="h1s">위험해서가 아니라,<br>정보가 없었을 뿐이에요</div>
+  <div class="p1s">기존 신용점수만으로는 씬파일러를 제대로 평가할 수 없다는 게, 실제 데이터로 반복 확인됐어요.</div>
+  <div class="card"><div class="row-between"><span style="font-size:13px;font-weight:700;">대안정보 결합 시 예측정확도</span><span class="num-pos">상승</span></div>
+    <div class="foot-note">Track B 사후검증 · 기존 신용정보 AUC 0.53(p=0.297, 찍기 수준) → 대안변수 AUC 0.77(p&lt;0.001)</div></div>
+  <div class="card"><div class="row-between"><span style="font-size:13px;font-weight:700;">Track A 독립 검증</span><span class="num-pos">AUROC 0.690</span></div>
+    <div class="foot-note">실측 라벨 68,677명 · 95% CI [0.646, 0.731] · 인구통계 변수 전면 배제</div></div>
+  <div class="card"><div class="row-between"><span style="font-size:13px;font-weight:700;">재현성</span><span class="num-pos">확인됨</span></div>
+    <div class="foot-note">두 트랙이 서로 다른 데이터·방법으로 독립적으로 같은 방향에 도달</div></div>
+  <div class="btn btn-primary" style="margin-top:8px;" onclick="advance()">다음 →</div>
+`; }
+function screenP2(){ return `
+  <div class="h1s">안전하게<br>정보를 연결할게요</div>
+  <div class="p1s">마이데이터 방식으로 조회하며, 원본 데이터는 저장하지 않습니다.</div>
+  <div class="check-line" onclick="event.currentTarget.querySelector('.checkbox').classList.toggle('checked')"><div class="checkbox checked">✓</div><div class="check-body"><div class="t">[필수] 통신 이용정보 조회</div><div class="d">요금 납부 이력, 가입 기간, 명의 유지 기간 등</div></div></div>
+  <div class="check-line" onclick="event.currentTarget.querySelector('.checkbox').classList.toggle('checked')"><div class="checkbox checked">✓</div><div class="check-body"><div class="t">[필수] 카드·소비 정보 조회</div><div class="d">카테고리별 소비 패턴, 결제 규칙성 등</div></div></div>
+  <div class="check-line" onclick="event.currentTarget.querySelector('.checkbox').classList.toggle('checked')"><div class="checkbox checked">✓</div><div class="check-body"><div class="t">[필수] 개인정보 처리방침 동의</div><div class="d">분석 목적으로만 처리 · 원본 데이터는 저장하지 않음</div></div></div>
+  <div style="height:30px"></div>
+  <div class="btn btn-primary" onclick="advance()">동의하고 분석 시작</div>
+`; }
+const LOADING_STEPS = ['통신·소비 정보 수집', '대안변수 패턴 분석', '등급 산출'];
+function loadingLine(i){
+  const step = state.loadingStep;
+  if(i < step) return `<div style="font-size:13px;margin-bottom:8px;">✅ ${LOADING_STEPS[i]} 완료</div>`;
+  if(i === step) return `<div style="font-size:13px;margin-bottom:8px;color:var(--primary-dark);font-weight:700;"><span class="dot-spin"></span> ${LOADING_STEPS[i]} 중…</div>`;
+  return `<div style="font-size:13px;margin-bottom:8px;color:var(--ink-faint);">${i+1}. ${LOADING_STEPS[i]} 대기 중</div>`;
+}
+function screenP3(){
+  const done = state.loadingStep >= LOADING_STEPS.length;
+  return `
+  <div style="display:flex;justify-content:center;padding:30px 0 10px;">
+    <div class="spinner" style="width:64px;height:64px;border-radius:50%;border:4px solid var(--primary-soft);border-top-color:var(--primary); ${done?'opacity:.25;':''}"></div>
+  </div>
+  <div class="h1s" style="text-align:center;">${done? '분석이 끝났어요' : '당신의 숨은 신용을<br>분석하고 있어요'}</div>
+  <div class="p1s" style="text-align:center;">${done? '결과를 확인해보세요' : '보통 8초 정도 걸려요'}</div>
+  <div class="card" style="margin-top:20px;">
+    ${loadingLine(0)}${loadingLine(1)}${loadingLine(2)}
+  </div>
+  ${done ? '<div class="btn btn-primary" style="margin-top:20px;" onclick="advance()">결과 확인하기 →</div>' : ''}
+`; }
+function manageLoadingTimer(curId){
+  if(curId === 'p3'){
+    if(!loadingTimer){
+      state.loadingStep = 0;
+      loadingTimer = setInterval(()=>{
+        state.loadingStep = Math.min(LOADING_STEPS.length, state.loadingStep+1);
+        const screenEl = document.querySelector('.phone .screen');
+        if(screenEl) screenEl.innerHTML = screenP3();
+        if(state.loadingStep >= LOADING_STEPS.length) clearLoadingTimer();
+      }, 750);
+    }
+  } else {
+    clearLoadingTimer();
+  }
+}
+function clearLoadingTimer(){ if(loadingTimer){ clearInterval(loadingTimer); loadingTimer=null; } }
+function resultCardText(grade){
+  if(grade<=3) return `신용이력을 가진 사람들 중에서도 우수한 등급대 분포와 유사한 패턴이에요. 대안정보 기준으로 안정적인 신호가 확인돼요.`;
+  if(grade<=6) return `신용이력을 가진 사람들의 중간등급대 분포와 유사한 패턴이에요. 위험군이 아니라 <b>정보가 부족했던 것</b>으로 해석돼요.`;
+  return `신용이력을 가진 사람들 중 상대적으로 위험 신호가 많은 등급대 분포와 유사해요. 대안정보 기준의 참고 결과이니, 심사 시 다른 근거와 함께 확인해 주세요.`;
+}
+function screenP4(){
+  const t=T(), d=demo(); const dist = t.dist || [8,14,20,22,18,10,5,2,1]; const max=Math.max(...dist);
+  const bars = dist.map((v,i)=>{ const grade=i+1; const isMe=grade===d.grade;
+    return `<div class="bar${isMe?' me':''}" style="height:${Math.max(10,(v/max)*80)}px;">${isMe?'<span class="tag">내 위치</span>':''}</div>`; }).join('');
+  return `
+  <div class="p1s" style="margin-bottom:6px;">진단 결과 · ${d.id}</div>
+  <div class="grade-big"><span class="n">${d.grade}</span><span class="u">/ 9등급</span></div>
+  <div class="badge manage" style="margin-bottom:8px;">${d.grade<=3?'우수 등급대':(d.grade<=6?'중간 등급대 · 안정적 패턴':'관찰이 필요한 구간')}</div>
+  <div class="hist">${bars}</div>
+  <div class="foot-note">동일 모집단(${t.popLabel}) 대비 상위 <b>${(100-d.pct).toFixed(1).replace(/\.0$/,'')}%</b> 구간이에요.</div>
+  <div class="card tinted" style="margin-top:16px;">${resultCardText(d.grade)}</div>
+  <div class="foot-note">이 등급은 참고용이에요. 최종 대출·보증 심사는 각 기관의 별도 기준에 따라요.</div>
+  <div class="btn btn-primary" style="margin-top:14px;" onclick="advance()">왜 이 등급인지 보기 →</div>
+`; }
+function donutSvg(donut){
+  const r=40,c=2*Math.PI*r; let offset=0;
+  return `<svg width="120" height="120" viewBox="0 0 120 120">${donut.map(d=>{ const len=c*(d.pct/100);
+    const seg=`<circle cx="60" cy="60" r="${r}" fill="none" stroke="${d.color}" stroke-width="16" stroke-dasharray="${len} ${c-len}" stroke-dashoffset="${-offset}" transform="rotate(-90 60 60)"/>`; offset+=len; return seg; }).join('')}</svg>`;
+}
+/* 신청자마다 다른 근거 수치를 보여주기 위한 결정적(같은 사람은 항상 같은 값) 시드 함수.
+   실 데이터 연동 전까지, applicant id + 변수 코드로 값을 고정 생성한다. */
+/* 실제 노트북에서 계산한 신청자별 원본값·미드랭크 백분위.
+   Track B: track_b_features_apply_v2.csv 기반. Track A: track_a_apply.csv 기반(전체 794,773명 대비).
+   AS120G001(현거주지 평형)은 사람마다 실측 결측(-9) 여부가 달라 raw:null/pct:null로 표시한다. */
+const REAL_FACTOR_DATA = {
+  B: {
+    'SYN_123786': { PYE_AL012G019:{raw:1, pct:13.2}, PYE_AL012G005:{raw:1, pct:13.5}, TOT_ASST:{raw:0,      pct:4.7},  YOY_TOT_ASST_RTC:{raw:0.000000,  pct:20.5}, R3M_ITRT_ENT_BROADCAST:{raw:2, pct:67.8}, PET_GD_woe:{raw:0.000000, pct:22.5} },
+    'SYN_157870': { PYE_AL012G019:{raw:3, pct:96.1}, PYE_AL012G005:{raw:2, pct:53.6}, TOT_ASST:{raw:264223,  pct:67.4}, YOY_TOT_ASST_RTC:{raw:0.046888,  pct:33.6}, R3M_ITRT_ENT_BROADCAST:{raw:2, pct:67.8}, PET_GD_woe:{raw:0.000000, pct:22.5} },
+    'SYN_161650': { PYE_AL012G019:{raw:2, pct:59.3}, PYE_AL012G005:{raw:2, pct:53.6}, TOT_ASST:{raw:193981,  pct:56.2}, YOY_TOT_ASST_RTC:{raw:0.134763,  pct:48.2}, R3M_ITRT_ENT_BROADCAST:{raw:3, pct:94.2}, PET_GD_woe:{raw:0.044012, pct:69.7} },
+    'SYN_164838': { PYE_AL012G019:{raw:1, pct:13.2}, PYE_AL012G005:{raw:1, pct:13.5}, TOT_ASST:{raw:145992,  pct:45.9}, YOY_TOT_ASST_RTC:{raw:0.328057,  pct:79.7}, R3M_ITRT_ENT_BROADCAST:{raw:1, pct:40.1}, PET_GD_woe:{raw:0.044012, pct:69.7} },
+    'SYN_175159': { PYE_AL012G019:{raw:2, pct:59.3}, PYE_AL012G005:{raw:2, pct:53.6}, TOT_ASST:{raw:110628,  pct:36.3}, YOY_TOT_ASST_RTC:{raw:0.225347,  pct:64.4}, R3M_ITRT_ENT_BROADCAST:{raw:2, pct:67.8}, PET_GD_woe:{raw:0.044012, pct:69.7} },
+    'SYN_195157': { PYE_AL012G019:{raw:2, pct:59.3}, PYE_AL012G005:{raw:2, pct:53.6}, TOT_ASST:{raw:71522,   pct:22.7}, YOY_TOT_ASST_RTC:{raw:-0.093488, pct:5.8},  R3M_ITRT_ENT_BROADCAST:{raw:2, pct:67.8}, PET_GD_woe:{raw:0.044012, pct:69.7} },
+    'SYN_235837': { PYE_AL012G019:{raw:3, pct:96.1}, PYE_AL012G005:{raw:3, pct:87.8}, TOT_ASST:{raw:0,       pct:4.7},  YOY_TOT_ASST_RTC:{raw:0.000000,  pct:20.5}, R3M_ITRT_ENT_BROADCAST:{raw:0, pct:16.5}, PET_GD_woe:{raw:0.044012, pct:69.7} },
+    'SYN_280928': { PYE_AL012G019:{raw:3, pct:96.1}, PYE_AL012G005:{raw:2, pct:53.6}, TOT_ASST:{raw:111406,  pct:36.5}, YOY_TOT_ASST_RTC:{raw:-0.058681, pct:8.0},  R3M_ITRT_ENT_BROADCAST:{raw:2, pct:67.8}, PET_GD_woe:{raw:0.044012, pct:69.7} },
+    'SYN_285930': { PYE_AL012G019:{raw:2, pct:59.3}, PYE_AL012G005:{raw:1, pct:13.5}, TOT_ASST:{raw:80806,   pct:26.4}, YOY_TOT_ASST_RTC:{raw:0.028865,  pct:31.0}, R3M_ITRT_ENT_BROADCAST:{raw:2, pct:67.8}, PET_GD_woe:{raw:0.000000, pct:22.5} },
+  },
+  A: {
+    'TA_C9399E00': { AL012G019:{raw:2, pct:71.9}, AL012G005:{raw:2, pct:70.2}, AL012G011:{raw:1, pct:47.8}, U81301010:{raw:178495, pct:33.8}, U81306010:{raw:16, pct:43.6}, AS120G001:{raw:3,    pct:63.0} },
+    '82EDC843':    { AL012G019:{raw:2, pct:71.9}, AL012G005:{raw:2, pct:70.2}, AL012G011:{raw:1, pct:47.8}, U81301010:{raw:323662, pct:54.5}, U81306010:{raw:13, pct:27.7}, AS120G001:{raw:2,    pct:25.0} },
+    'TA_5AE19E5A': { AL012G019:{raw:1, pct:24.0}, AL012G005:{raw:1, pct:22.6}, AL012G011:{raw:1, pct:47.8}, U81301010:{raw:173031, pct:33.3}, U81306010:{raw:19, pct:77.4}, AS120G001:{raw:null, pct:null} },
+    'D7332D0B':    { AL012G019:{raw:1, pct:24.0}, AL012G005:{raw:1, pct:22.6}, AL012G011:{raw:1, pct:47.8}, U81301010:{raw:35276,  pct:1.6},  U81306010:{raw:18, pct:61.9}, AS120G001:{raw:null, pct:null} },
+    '21BF53E7':    { AL012G019:{raw:1, pct:24.0}, AL012G005:{raw:1, pct:22.6}, AL012G011:{raw:1, pct:47.8}, U81301010:{raw:237115, pct:42.4}, U81306010:{raw:17, pct:52.3}, AS120G001:{raw:null, pct:null} },
+    '29A8ECD2':    { AL012G019:{raw:2, pct:71.9}, AL012G005:{raw:5, pct:99.7}, AL012G011:{raw:2, pct:97.6}, U81301010:{raw:35276,  pct:1.6},  U81306010:{raw:19, pct:77.4}, AS120G001:{raw:null, pct:null} },
+    'TA_66105227': { AL012G019:{raw:2, pct:71.9}, AL012G005:{raw:2, pct:70.2}, AL012G011:{raw:1, pct:47.8}, U81301010:{raw:995130, pct:87.2}, U81306010:{raw:19, pct:77.4}, AS120G001:{raw:null, pct:null} },
+    '78D82BEF':    { AL012G019:{raw:1, pct:24.0}, AL012G005:{raw:1, pct:22.6}, AL012G011:{raw:1, pct:47.8}, U81301010:{raw:35276,  pct:1.6},  U81306010:{raw:20, pct:93.6}, AS120G001:{raw:null, pct:null} },
+    '000006AA':    { AL012G019:{raw:2, pct:71.9}, AL012G005:{raw:2, pct:70.2}, AL012G011:{raw:1, pct:47.8}, U81301010:{raw:87479,  pct:13.4}, U81306010:{raw:20, pct:93.6}, AS120G001:{raw:1, pct:65.5} },
+  },
+};
+function fmtRaw(code, raw){
+  if(code==='YOY_TOT_ASST_RTC') return (raw*100).toFixed(1)+'%';
+  if(code==='TOT_ASST') return raw.toLocaleString('ko-KR');
+  if(code==='U81301010') return Number(raw).toLocaleString('ko-KR');
+  if(code==='U81306010') return raw+'구간';
+  if(code==='AS120G001') return String(raw);
+  if(code==='R3M_ITRT_ENT_BROADCAST') return raw+'건';
+  if(code==='PET_GD_woe') return Number(raw).toFixed(4);
+  return raw+'회'; // AL012G019/PYE_AL012G019, AL012G005/PYE_AL012G005, AL012G011 등 변경 이력 카운트
+}
+function seedHash(str){ let h=0; for(let i=0;i<str.length;i++){ h=(h*31+str.charCodeAt(i))>>>0; } return h; }
+function seededPct(seedStr, min, max){ const frac=(seedHash(seedStr)%1000)/1000; return Math.round(min+frac*(max-min)); }
+function factorsFor(t, a){
+  const real = REAL_FACTOR_DATA[t.key] && REAL_FACTOR_DATA[t.key][a.id];
+  return t.factors.map(f=>{
+    const realField = real && real[f.code];
+    if(realField){
+      if(realField.pct===null) return { ...f, pct: null, raw: null, isReal: true }; // 이 사람은 실측으로 결측 확인됨
+      const out = { ...f, pct: Math.round(realField.pct), raw: realField.raw, isReal: true };
+      if(f.dir==='pos' || f.dir==='neg') out.delta = Math.round((f.dir==='pos' ? (realField.pct-50) : (50-realField.pct)) * 0.4);
+      return out; // dir:'na'인 변수(예: 현거주지 평형)는 방향성이 없어 델타(긍정/부정)를 매기지 않는다
+    }
+    if(f.pct===null) return f; // 실측 데이터가 아예 없고 원 정의상 구조적 결측인 변수
+    const pct = seededPct(a.id+'|'+f.code, 8, 96); // 실데이터 미확보 임시값
+    const out = { ...f, pct };
+    if(f.dir==='pos' || f.dir==='neg') out.delta = Math.round((f.dir==='pos' ? (pct-50) : (50-pct)) * 0.4);
+    return out;
+  });
+}
+/* 이 사람에게 실제로 '튀는'(백분위가 50에서 가장 많이 벗어난) 변수 상위 n개만 고른다.
+   개인별 로컬 SHAP 값이 없는 상태에서, 있는 실제 데이터(백분위)만으로 화면마다 다른 변수 조합을 보여주기 위한 선택 로직.
+   방향성 없는(dir:'na') 변수와 결측 변수는 선택 대상에서 빼고 항상 별도로 그대로 보여준다. */
+function topFactorsFor(t, a, n=4){
+  const factors = factorsFor(t, a);
+  const rankable = factors.filter(f=>f.pct!==null && f.delta!==undefined);
+  const others = factors.filter(f=>f.pct===null || f.delta===undefined);
+  const top = rankable.slice().sort((x,y)=>Math.abs(y.pct-50)-Math.abs(x.pct-50)).slice(0, n);
+  return top.concat(others);
+}
+function dirNote(f){
+  if(f.dir==='pos') return ' · 값이 높을수록 유리하게 반영돼요';
+  if(f.dir==='neg') return ' · 값이 낮을수록 유리하게 반영돼요';
+  return '';
+}
+function subtitleFor(f){
+  if(f.pct===null) return '정보 없음';
+  const c = f.code;
+  let base;
+  if(c==='PYE_AL012G019' || c==='AL012G019' || c==='PYE_AL012G005' || c==='AL012G005' || c==='AL012G011')
+    base = `최근 3년 내 ${f.raw!==undefined?f.raw:'-'}회 변경`;
+  else if(c==='TOT_ASST') base = `전체 대비 상위 ${f.pct}%`;
+  else if(c==='YOY_TOT_ASST_RTC') base = `최근 1년 ${f.raw!==undefined?(f.raw*100).toFixed(1):'-'}% 증감`;
+  else if(c==='U81301010') base = `매매가 상위 ${f.pct}%`;
+  else if(c==='U81306010') base = `전세가 구간 ${f.raw!==undefined?f.raw:'-'} · 상위 ${f.pct}%`;
+  else if(c==='AS120G001') base = `현거주지 평형 원본값 ${f.raw!==undefined?f.raw:'-'} · 상위 ${f.pct}%`;
+  else if(c==='R3M_ITRT_ENT_BROADCAST') base = `최근 3개월 이용 ${f.raw!==undefined?f.raw:'-'}건 · 상위 ${f.pct}% (방향성 확인 전, 참고용)`;
+  else if(c==='PET_GD_woe') base = `지표값 ${f.raw!==undefined?Number(f.raw).toFixed(4):'-'} · 상위 ${f.pct}% (방향성 확인 전, 참고용)`;
+  else base = `전체 대비 상위 ${f.pct}%`;
+  return base + dirNote(f);
+}
+const IMPROVE_TIPS = {
+  PYE_AL012G019: { icon:'📱', title:'연락처 정보 안정적으로 유지하기',
+    desc: f => `최근 3년 내 변경 이력이 ${f.raw}회로 확인돼요. 변경 횟수가 적을수록 안정적인 신호로 반영돼요.` },
+  PYE_AL012G005: { icon:'🏠', title:'주소 정보 안정적으로 유지하기',
+    desc: f => `최근 3년 내 변경 이력이 ${f.raw}회로 확인돼요. 변경 횟수가 적을수록 안정적인 신호로 반영돼요.` },
+  TOT_ASST: { icon:'💰', title:'자산 정보 연동 확대하기',
+    desc: f => `현재 확인 가능한 자산 정보가 전체 대비 상위 ${f.pct}% 수준이에요. 연동 가능한 자산 정보를 늘리면 평가에 참고돼요.` },
+  YOY_TOT_ASST_RTC: { icon:'📈', title:'자산 흐름 꾸준히 관리하기',
+    desc: f => `최근 1년간 ${(f.raw*100).toFixed(1)}% 증감했어요. 완만하게라도 증가 추세를 유지하면 긍정 신호가 돼요.` },
+  AL012G019: { icon:'📱', title:'연락처 정보 안정적으로 유지하기',
+    desc: f => `최근 3년 내 변경 이력이 ${f.raw}회로 확인돼요. 변경 횟수가 적을수록 안정적인 신호로 반영돼요.` },
+  AL012G005: { icon:'🏠', title:'주소 정보 정확하게 관리하기',
+    desc: f => `최근 3년 내 변경 이력이 ${f.raw}회로 확인돼요. 이 항목은 신호가 약해 큰 영향은 없어요.` },
+  AL012G011: { icon:'💼', title:'직장 정보 안정적으로 유지하기',
+    desc: f => `최근 3년 내 변경 이력이 ${f.raw}회로 확인돼요. 직장 정보가 안정적으로 유지되면 신뢰도 신호가 강화돼요.` },
+  U81301010: { icon:'🏘️', title:'거주지 정보 최신화하기',
+    desc: f => `거주지 시세 정보가 전체 대비 상위 ${f.pct}%로 확인돼요. 관련 정보가 정확히 연동될수록 참고 정확도가 높아져요.` },
+  U81306010: { icon:'🏠', title:'거주 안정성 정보 관리하기',
+    desc: f => `거주지 전세가 구간이 전체 대비 상위 ${f.pct}%로 확인돼요. 거주 정보가 안정적으로 유지되면 신뢰도 신호가 강화돼요.` },
+  AS120G001: { icon:'🏠', title:'거주 정보 확인하기',
+    desc: f => `현거주지 평형 관련 정보가 전체 대비 상위 ${f.pct}%로 확인돼요. 관련 정보가 정확히 확인될수록 평가에 참고돼요.` },
+};
+/* 정보영역(도넛) 비중은 실제 SHAP 전역 중요도(mean_abs_shap, shap_feature_importance_trackB.csv /
+   track_a_shap_importance.csv)를 4개 카테고리로 합산한 값이다. 개인별 로컬 SHAP 값이 없어 신청자
+   전원에게 같은 값이 적용된다 — t.donut에 이미 실제 값이 들어있으므로 그대로 반환한다. */
+function donutFor(t, a){
+  return t.donut;
+}
+function reasonRows(factors){
+  const known = factors.filter(f=>f.pct!==null && f.delta!==undefined);
+  const neutral = factors.filter(f=>f.pct!==null && f.delta===undefined);
+  const missing = factors.filter(f=>f.pct===null);
+  const positives = known.filter(f=>f.delta>=0).sort((a,b)=>b.delta-a.delta);
+  const negatives = known.filter(f=>f.delta<0).sort((a,b)=>a.delta-b.delta);
+  const row = f => `<div class="reason-row"><div><div class="t">${f.name}</div><div class="d">${subtitleFor(f)}</div></div>
+    <div class="v ${f.delta>=0?'pos':'neg'}">상위 ${f.pct}%</div></div>`;
+  const neutralRow = f => `<div class="reason-row"><div><div class="t">${f.name}</div><div class="d">${subtitleFor(f)}</div></div>
+    <div class="v" style="color:var(--ink-faint);font-size:12px;">상위 ${f.pct}%</div></div>`;
+  let html = '';
+  if(positives.length){ html += `<div class="group-label">긍정적으로 작용</div>${positives.map(row).join('')}`; }
+  if(negatives.length){ html += `<div class="group-label">개선 여지</div>${negatives.map(row).join('')}`; }
+  if(neutral.length){ html += `<div class="group-label">참고 정보 (방향성 판단 제외)</div>${neutral.map(neutralRow).join('')}`; }
+  if(missing.length){ html += `<div class="group-label">정보 없음</div>${missing.map(f=>`<div class="reason-row"><div><div class="t">${f.name}</div><div class="d">데이터 미확보 · 평가에서 제외</div></div><div class="v" style="color:var(--ink-faint)">–</div></div>`).join('')}`; }
+  return html;
+}
+function factorCards(factors){
+  return factors.map(f=>{
+    const tagHtml = f.tag==='manage' ? '<span class="badge manage">관리가능</span>' : '<span class="badge watch">관찰지표</span>';
+    const pctHtml = f.pct===null ? '<span style="font-size:11px;color:var(--ink-faint)">정보 없음(결측)</span>' :
+      `<span style="font-size:12px;color:var(--ink-faint)">전체 대비 상위 <b style="color:var(--ink)">${f.pct}%</b>${f.dir==='pos'||f.dir==='neg' ? `<span style="color:var(--ink-faint);font-weight:400;">${dirNote(f)}</span>` : ''}</span>`;
+    let barHtml = '';
+    if(f.pct!==null){
+      const barColor = f.delta===undefined ? 'var(--ink-faint)' : (f.delta>=0 ? 'var(--positive)' : 'var(--negative)');
+      barHtml = `<div class="pct-bar-track"><div class="pct-bar-fill" style="width:${f.pct}%;background:${barColor};"></div><div class="pct-bar-mid"></div></div>
+        <div class="pct-bar-labels"><span>0%</span><span>전체 평균(50%)</span><span>100%</span></div>`;
+    }
+    const footNote = f.isReal
+      ? `${f.code} · 원본값 ${fmtRaw(f.code, f.raw)} · 미드랭크 백분위`
+      : `${f.code} · 예시 수치 · 실 데이터 반영 예정`;
+    return `<div class="card"><div class="row-between"><span style="font-size:13px;font-weight:700;">${f.name}</span>${tagHtml}</div>
+      <div style="margin-top:4px;">${pctHtml}</div>
+      ${barHtml}
+      <div class="foot-note" style="margin-top:6px;">${footNote}</div></div>`;
+  }).join('');
+}
+function screenP5(){ const t=T(); const a=demo();
+  const donut = donutFor(t,a), factors = topFactorsFor(t,a,4);
+  const legend = donut.map(d=>`<div class="li"><span class="dot" style="background:${d.color}"></span><span class="name">${d.name}</span><span class="pct">${d.pct}%</span></div>`).join('');
+  return `
+  <div class="h1s">이 등급은<br>이렇게 나왔어요</div>
+  <div class="p1s">어떤 정보영역이 얼마나 반영됐는지 보여드려요. (이 트랙 모델 전체 기준·모든 신청자 공통)</div>
+  <div class="donut-wrap">${donutSvg(donut)}<div class="legend">${legend}</div></div>
+  <div style="font-size:12.5px;font-weight:700;margin:14px 0 2px;">무엇이 영향을 줬는지 (이 신청자에게 가장 두드러진 ${factors.length}개 변수)</div>
+  ${reasonRows(factors)}
+  <div class="caveat">긍정적으로 작용/개선 여지 구분은 각 변수의 백분위와 방향성(높을수록·낮을수록 유리)을 기준으로 나눈 거예요. 신청자마다 백분위가 50에서 가장 많이 벗어난 변수만 골라 보여드려요. 백분위는 전체 모집단 대비 미드랭크(동순위 평균처리) 방식으로 계산했어요. 실제 심사 반영 비중과는 다를 수 있어요.</div>
+  <div class="btn btn-primary" style="margin-top:14px;" onclick="advance()">등급 올리는 방법 보기 →</div>
+`; }
+function screenP6(){ const t=T(); const a=demo();
+  const known = topFactorsFor(t,a,4).filter(f=>f.pct!==null && f.delta!==undefined);
+  const weak = known.filter(f=>f.delta<0).sort((x,y)=>x.delta-y.delta);
+  const cards = weak.map(f=>{
+    const tip = IMPROVE_TIPS[f.code];
+    if(!tip) return '';
+    const mag = Math.abs(f.delta);
+    const tier = mag>=15 ? '상' : (mag>=8 ? '중' : '하');
+    const badgeClass = tier==='상' ? 'manage' : 'watch';
+    return `<div class="card"><div class="row-between"><span style="font-size:13px;font-weight:700;">${tip.icon} ${tip.title}</span></div>
+      <div class="foot-note">${tip.desc(f)}</div><span class="badge ${badgeClass}" style="margin-top:8px;display:inline-block;">영향도 ${tier}</span></div>`;
+  }).join('');
+  const body = cards || `<div class="card tinted">현재 확인된 변수들은 모두 긍정적으로 작용하고 있어요. 지금 상태를 유지하는 것만으로도 충분해요.</div>`;
+  return `
+  <div class="h1s">이렇게 하면<br>더 좋아질 수 있어요</div>
+  <div class="p1s">${a.id} · 현재 데이터를 기준으로 한 개선 여지예요.</div>
+  ${body}
+  <div style="height:6px"></div>
+  <div class="btn btn-primary" onclick="advance()">이 결과 활용하기 →</div>
+`; }
+function screenP7(){ const inst = state.institution; return `
+  <div class="h1s">이 리포트를<br>어디로 보낼까요</div>
+  <div class="p1s">제휴 기관에 참고자료로 바로 전달할 수 있어요.</div>
+  <div class="radio-card ${inst==='bank'?'selected':''}" onclick="selectInst('bank')"><div><div class="t">청년정책 A은행</div><div class="d">신규 신용대출 심사</div></div><div class="radio-dot"></div></div>
+  <div class="radio-card ${inst==='fund'?'selected':''}" onclick="selectInst('fund')"><div><div class="t">청년보증 B재단</div><div class="d">정책자금 보증심사</div></div><div class="radio-dot"></div></div>
+  <div class="radio-card ${inst==='card'?'selected':''}" onclick="selectInst('card')"><div><div class="t">C카드 첫카드 발급</div><div class="d">생애 첫 카드 심사</div></div><div class="radio-dot"></div></div>
+  <div class="foot-note">전송된 리포트는 심사 참고자료로만 활용되며, 최종 승인 여부는 각 기관의 자체 기준에 따라 결정돼요.</div>
+  <div style="height:16px"></div>
+  <button class="btn btn-primary" ${inst?'':'disabled'} onclick="goInstitution()">${inst ? {bank:'청년정책 A은행',fund:'청년보증 B재단',card:'C카드'}[inst]+'으로 계속하기 →' : '기관을 선택해주세요'}</button>
+`; }
+function screenBankInfo(){ return `
+  <div class="h1s">신용이력 없이도<br>대출심사를 받아요</div>
+  <div class="p1s">대안등급 리포트로 은행 사전심사부터 조건 비교까지 한번에 진행해요.</div>
+  <div class="step-item"><div class="step-num">1</div><div class="step-txt">내 대안등급과 근거자료를 가져와요</div></div>
+  <div class="step-item"><div class="step-num">2</div><div class="step-txt">제휴 은행의 사전심사 조건을 비교해요</div></div>
+  <div class="step-item"><div class="step-num">3</div><div class="step-txt">가장 좋은 조건으로 본심사를 신청해요</div></div>
+  <div style="font-size:13px;font-weight:700;margin:14px 0 4px;">신청할 수 있는 상품</div>
+  <div class="list-line"><span>청년 첫 신용대출</span><span class="avail">가능</span></div>
+  <div class="list-line"><span>비상금 소액대출</span><span class="avail">가능</span></div>
+  <div class="list-line"><span>마이너스통장</span><span class="avail">가능</span></div>
+  <div class="list-line"><span>전월세보증금 대출</span><span class="soon">준비중</span></div>
+  <div style="font-size:13px;font-weight:700;margin:14px 0 4px;">사전심사 가능한 은행</div>
+  <div class="inst-grid"><div class="inst-cell"><span class="inst-init">청</span>청년정책 A은행</div><div class="inst-cell"><span class="inst-init">D</span>D상호은행</div>
+    <div class="inst-cell"><span class="inst-init">E</span>E인터넷은행</div><div class="inst-cell"><span class="inst-init">F</span>F저축은행</div>
+    <div class="inst-cell"><span class="inst-init">G</span>G지방은행</div><div class="inst-cell"><span class="inst-init">H</span>H협동조합</div></div>
+  <div class="btn btn-primary" onclick="advance()">은행 사전심사 신청</div>
+`; }
+function screenBankSend(){ return `
+  <div class="h1s">청년 첫 신용대출</div>
+  <div class="list-line"><span>대출한도</span><span style="font-weight:700;">최대 1,500만원</span></div>
+  <div class="list-line"><span>금리구간</span><span style="font-weight:700;">연 5.9~11.4%</span></div>
+  <div class="list-line"><span>대안등급 반영</span><span class="num-pos">우대금리 -0.4%p</span></div>
+  <div class="card tinted"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px;">대안등급 반영 시 예상 조건 (사전심사 참고)</div>
+    <div style="font-size:20px;font-weight:800;color:var(--primary-dark);">연 8.2% <span style="font-size:13px;font-weight:600;">한도 900만원</span></div>
+    <div class="foot-note">확정 조건이 아니며, 소득·부채 서류 확인 후 변동될 수 있어요.</div></div>
+  <div style="font-size:13px;font-weight:700;margin:14px 0 4px;">전송 항목</div>
+  <div class="check-line"><div class="checkbox checked">✓</div><div class="check-body"><div class="t">대안신용등급 요약 (필수)</div><div class="d">등급 · AUC · 신뢰구간</div></div></div>
+  <div class="check-line"><div class="checkbox checked">✓</div><div class="check-body"><div class="t">상환능력 관련 변수 (필수)</div><div class="d">통신비 납부 · 정기결제 지속성</div></div></div>
+  <div class="check-line" onclick="event.currentTarget.querySelector('.checkbox').classList.toggle('checked')"><div class="checkbox">✓</div><div class="check-body"><div class="t">소비패턴 상세 (선택)</div><div class="d">업종별 비중 · 변동성 지표</div></div></div>
+  <div class="two-col" style="margin-top:12px;"><div class="stat-box"><div class="l">사전심사 결과</div><div class="v">즉시</div></div>
+    <div class="stat-box"><div class="l">신용조회 영향</div><div class="v" style="color:var(--positive)">없음</div></div></div>
+  <div class="foot-note">사전심사는 신용점수에 영향을 주지 않아요. 본심사 진행 시 은행이 별도로 동의를 받아요.</div>
+  <div class="btn btn-primary" style="margin-top:14px;" onclick="jump('p8')">청년정책 A은행으로 전송하기</div>
+`; }
+function screenFundInfo(){ return `
+  <div class="h1s">보증서로<br>대출받으세요</div>
+  <div class="p1s">재단이 보증을 서면 은행은 담보 없이 대출을 실행해요.</div>
+  <div class="step-item"><div class="step-num">1</div><div class="step-txt">대안등급 리포트를 재단에 접수해요</div></div>
+  <div class="step-item"><div class="step-num">2</div><div class="step-txt">재단이 보증서 발급 여부를 심사해요</div></div>
+  <div class="step-item"><div class="step-num">3</div><div class="step-txt">보증서를 받아 협약 은행에서 대출을 받아요</div></div>
+  <div style="font-size:13px;font-weight:700;margin:14px 0 4px;">신청할 수 있는 보증</div>
+  <div class="list-line"><span>청년 첫걸음 보증</span><span class="avail">가능</span></div>
+  <div class="list-line"><span>사회초년생 생활안정 보증</span><span class="avail">가능</span></div>
+  <div class="list-line"><span>청년 창업자금 보증</span><span class="avail">가능</span></div>
+  <div class="list-line"><span>전세보증금 반환보증</span><span class="soon">준비중</span></div>
+  <div style="font-size:13px;font-weight:700;margin:14px 0 4px;">보증서 사용 가능한 협약 기관</div>
+  <div class="inst-grid"><div class="inst-cell"><span class="inst-init">청</span>청년보증 B재단</div><div class="inst-cell"><span class="inst-init">K</span>K신용보증재단</div>
+    <div class="inst-cell"><span class="inst-init">L</span>L지역재단</div><div class="inst-cell"><span class="inst-init">M</span>M청년기금</div>
+    <div class="inst-cell"><span class="inst-init">N</span>N상호금융</div><div class="inst-cell"><span class="inst-init">O</span>O협약은행</div></div>
+  <div class="btn btn-primary" onclick="advance()">보증 심사 신청</div>
+`; }
+function screenFundSend(){ const d=demo(); return `
+  <div class="h1s">청년보증 B재단</div>
+  <div class="p1s">재단이 요구하는 항목을 맞춰서 보낼게요</div>
+  <div class="card"><div style="font-size:12.5px;font-weight:700;margin-bottom:8px;">보증 프로그램</div>
+    <div class="list-line"><span>청년 첫걸음 보증</span><span style="font-weight:700;">한도 2,000만원</span></div>
+    <div class="list-line"><span>보증비율</span><span style="font-weight:700;">90%</span></div>
+    <div class="list-line"><span>대안등급 인정구간</span><span style="font-weight:700;">1~5등급</span></div></div>
+  <div class="card tinted">내 ${d.grade}등급은 인정구간 안에 있어요<div class="foot-note">참고자료 요건을 충족해 서류 심사 단계로 바로 접수됩니다.</div></div>
+  <div style="font-size:13px;font-weight:700;margin:14px 0 4px;">전송 항목</div>
+  <div class="check-line"><div class="checkbox checked">✓</div><div class="check-body"><div class="t">대안신용등급 요약 (필수)</div><div class="d">등급 · AUC · 신뢰구간</div></div></div>
+  <div class="check-line"><div class="checkbox checked">✓</div><div class="check-body"><div class="t">근거 변수 기여도 (필수)</div><div class="d">통신 · 소비 · 비금융 항목별</div></div></div>
+  <div class="check-line" onclick="event.currentTarget.querySelector('.checkbox').classList.toggle('checked')"><div class="checkbox">✓</div><div class="check-body"><div class="t">3개월 개선 시뮬레이션 (선택)</div><div class="d">재단 사후관리 참고용</div></div></div>
+  <div class="two-col" style="margin-top:12px;"><div class="stat-box"><div class="l">예상 처리기간</div><div class="v">5영업일</div></div>
+    <div class="stat-box"><div class="l">보관기간</div><div class="v">6개월</div></div></div>
+  <div class="foot-note">재단은 이 리포트를 보증심사 참고자료로만 활용하며, 최종 보증 여부는 재단 기준에 따라 결정돼요.</div>
+  <div class="btn btn-primary" style="margin-top:14px;" onclick="jump('p8')">청년보증 B재단으로 전송하기</div>
+`; }
+function screenCardInfo(){ return `
+  <div class="h1s">첫 카드,<br>이력이 없어도</div>
+  <div class="p1s">소득증빙 없이 대안등급만으로 첫카드 발급심사를 받아요.</div>
+  <div class="step-item"><div class="step-num">1</div><div class="step-txt">대안등급으로 발급 가능성을 확인해요</div></div>
+  <div class="step-item"><div class="step-num">2</div><div class="step-txt">첫카드 전용 상품과 조건을 비교해요</div></div>
+  <div class="step-item"><div class="step-num">3</div><div class="step-txt">6개월 정상 사용하면 한도가 재평가돼요</div></div>
+  <div style="font-size:13px;font-weight:700;margin:14px 0 4px;">발급 신청할 수 있는 카드</div>
+  <div class="list-line"><span>체크 겸용 첫카드</span><span class="avail">가능</span></div>
+  <div class="list-line"><span>교통·통신 할인카드</span><span class="avail">가능</span></div>
+  <div class="list-line"><span>소액 한도 신용카드</span><span class="avail">가능</span></div>
+  <div class="list-line"><span>해외겸용 프리미엄</span><span class="soon">준비중</span></div>
+  <div style="font-size:13px;font-weight:700;margin:14px 0 4px;">첫카드 발급 가능한 카드사</div>
+  <div class="inst-grid"><div class="inst-cell"><span class="inst-init">C</span>C카드</div><div class="inst-cell"><span class="inst-init">R</span>R카드</div>
+    <div class="inst-cell"><span class="inst-init">S</span>S카드</div><div class="inst-cell"><span class="inst-init">T</span>T카드</div>
+    <div class="inst-cell"><span class="inst-init">U</span>U카드</div><div class="inst-cell"><span class="inst-init">V</span>V카드</div></div>
+  <div class="btn btn-primary" onclick="advance()">첫카드 발급 신청</div>
+`; }
+function screenCardSend(){ return `
+  <div class="h1s">첫 카드는<br>발급 가능 여부가 궁금하시죠</div>
+  <div class="p1s">카드사는 신용이력이 없는 신청자를 '평가 불가'로 반려하는 경우가 많아요. 대안등급은 그 공백을 메우는 자료로 쓰여요.</div>
+  <div class="card dark"><div class="row-between"><span>첫카드 발급 가능성</span><span style="font-weight:800;">보통 이상</span></div>
+    <div class="hist" style="height:14px;margin:10px 0 8px;">${[1,1,1,1,1,1,1,0,0,0].map(v=>`<div class="bar" style="height:100%;background:${v?'#e7c77a':'rgba(255,255,255,.15)'};"></div>`).join('')}</div>
+    <div class="muted" style="font-size:11px;">동일 등급대 씬파일러 첫카드 발급 승인률 기준 추정치예요.</div></div>
+  <div class="card"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px;">예상 발급 조건</div>
+    <div class="list-line"><span>카드 종류</span><span style="font-weight:700;">체크 겸용 첫카드</span></div>
+    <div class="list-line"><span>초기 이용한도</span><span style="font-weight:700;">30만원</span></div>
+    <div class="list-line"><span>한도 재평가</span><span style="font-weight:700;">6개월 후 자동</span></div>
+    <div class="list-line"><span>연회비</span><span style="font-weight:700;">없음</span></div></div>
+  <div class="card tinted"><div style="font-size:12.5px;font-weight:700;margin-bottom:4px;">첫 카드가 만드는 다음 이력</div>발급 후 6개월간 정상 사용하면 금융 이력이 쌓여, 다음 진단부터는 대안정보 의존도가 낮아져요.</div>
+  <div style="font-size:13px;font-weight:700;margin:14px 0 4px;">전송 항목</div>
+  <div class="check-line"><div class="checkbox checked">✓</div><div class="check-body"><div class="t">대안신용등급 요약 (필수)</div><div class="d">등급 · AUC · 신뢰구간</div></div></div>
+  <div class="check-line"><div class="checkbox checked">✓</div><div class="check-body"><div class="t">결제 성실성 지표 (필수)</div><div class="d">통신비 연속 정상납부 · 연체 이력</div></div></div>
+  <div class="btn btn-primary" style="margin-top:8px;" onclick="jump('p8')">C카드로 전송하기</div>
+`; }
+function screenP8(){ return `
+  <div style="display:flex;justify-content:center;padding:30px 0 16px;">
+    <div style="width:64px;height:64px;border-radius:50%;background:var(--positive-bg);display:flex;align-items:center;justify-content:center;font-size:28px;">✓</div>
+  </div>
+  <div class="h1s" style="text-align:center;">리포트가<br>안전하게 전달됐어요</div>
+  <div class="p1s" style="text-align:center;">제휴 기관에서 심사 참고자료로 확인하고 있어요. 결과는 알림으로 안내드려요.</div>
+  <div class="card tinted">심사역은 이 리포트를 이렇게 봐요 — 같은 근거를 심사 콘솔에서도 확인할 수 있어요.</div>
+  <div class="btn btn-outline" style="margin-bottom:10px;" onclick="chooseExaminer()">심사자 콘솔 미리보기 →</div>
+  <div class="btn btn-primary" onclick="goLogin()">처음으로</div>
+`; }
+
+const P_RENDER = { p0:screenP0, p1:screenP1, p2:screenP2, p3:screenP3, p4:screenP4, p5:screenP5, p6:screenP6, p7:screenP7,
+  'p7-1a':screenBankInfo, 'p7-1b':screenBankSend, 'p7-2a':screenFundInfo, 'p7-2b':screenFundSend,
+  'p7-3a':screenCardInfo, 'p7-3b':screenCardSend, p8:screenP8 };
+
+/* ================= EXAMINER SCREENS ================= */
+function screenE0(){
+  const t = T();
+  const rows = t.applicants.map((a,i)=>{
+    const done = state.completedIds.has(a.id);
+    const status = done ? '완료' : QUEUE_STATUS[i % QUEUE_STATUS.length];
+    const badgeClass = done ? 'done' : (status==='신규 신청' ? 'manage' : 'watch');
+    return `
+    <div class="apply-row ${i===state.examinerAppIdx?'active':''}" onclick="pickApplicant(${i})">
+      <div class="avatar">${a.id.slice(-2)}</div>
+      <div class="info"><div class="n">${a.id}</div><div class="t">대안등급 리포트 · 점수 ${a.score}</div></div>
+      <span class="badge ${badgeClass}">${status}</span></div>`;
+  }).join('');
+  return `
+  <div class="row-between" style="margin-bottom:2px;"><div style="font-size:15px;font-weight:800;">심사 대기열</div><span style="font-size:11px;color:var(--ink-faint);">${t.applicants.length}건</span></div>
+  <div class="p1s" style="margin-top:2px;">${t.label} · 신청자를 선택하면 리포트로 이동해요</div>
+  <div class="apply-list">${rows}</div>
+`; }
+function screenE1(){
+  const t=T(); const a=t.applicants[state.examinerAppIdx];
+  const donut = donutFor(t,a), factors = factorsFor(t,a);
+  const legend = donut.map(d=>`<div class="li"><span class="dot" style="background:${d.color}"></span><span class="name">${d.name}</span><span class="pct">${d.pct}%</span></div>`).join('');
+  return `
+  <div class="p1s" style="margin-bottom:6px;">대안변수 리포트 · ${a.id} · <span class="grade-chip ${gradeClass(a.grade)}">${a.grade}등급</span></div>
+  <div class="h1s" style="margin-top:8px;">근거 자료를<br>확인하세요</div>
+  <div class="donut-wrap">${donutSvg(donut)}<div class="legend">${legend}</div></div>
+  <div style="font-size:12.5px;font-weight:700;margin:14px 0 8px;">세부 진단 (${factors.length}개 변수)</div>
+  ${factorCards(factors)}
+  <div class="btn btn-primary" style="margin-top:6px;" onclick="advance()">근거·신뢰도 확인 →</div>
+`; }
+function screenE2(){
+  const t=T(); const checkedN = state.caveats.filter(Boolean).length;
+  const existPct = t.existAuc!==null ? Math.round((t.existAuc-0.4)/(1-0.4)*100) : 0;
+  const altPct = Math.round((t.altAuc-0.4)/(1-0.4)*100);
+  const checks = caveatsFor(t).map((c,i)=>`
+    <div class="check-line" onclick="toggleCaveat(${i})"><div class="checkbox ${state.caveats[i]?'checked':''}">${state.caveats[i]?'✓':''}</div>
+    <div class="check-body"><div class="t" style="font-weight:500;font-size:12.5px;line-height:1.6;">${c}</div></div></div>`).join('');
+  return `
+  <div class="h1s">근거 · 신뢰도</div>
+  <div class="p1s">이 등급이 얼마나 검증됐는지 보여드려요.</div>
+  <div class="bar-compare"><div class="lbl"><span>기존 신용정보${t.key==='B'?' 26개':''}</span><span style="font-weight:800;color:var(--negative)">${t.existAuc!==null?('AUC '+t.existAuc):'확인 필요'}</span></div>
+    <div class="bar-track"><div class="bar-fill" style="width:${existPct}%;background:var(--negative);"></div></div>
+    <div class="foot-note" style="margin-top:4px;">${t.existP}</div></div>
+  <div class="bar-compare"><div class="lbl"><span>대안변수${t.key==='B'?' 66개':' 10개'}</span><span style="font-weight:800;color:var(--positive)">AUC ${t.altAuc}</span></div>
+    <div class="bar-track"><div class="bar-fill" style="width:${altPct}%;background:var(--positive);"></div></div>
+    <div class="foot-note" style="margin-top:4px;">${t.altP}</div></div>
+  <div class="card tinted">독립 검증 확인됨<div class="foot-note" style="margin-top:4px;">${t.indepNote}</div></div>
+  <div class="row-between" style="margin:16px 0 4px;"><span style="font-size:13px;font-weight:700;">한계 고지</span><span style="font-size:11.5px;color:var(--ink-faint);">모두 확인해야 다음 진행 · ${checkedN}/4</span></div>
+  ${checks}
+  <button class="btn btn-primary" style="margin-top:16px;" ${allCaveatsChecked()?'':'disabled'} onclick="advance()">등급·최종판단으로 →</button>
+`; }
+function screenE3(){
+  const t=T(); const a=t.applicants[state.examinerAppIdx];
+  const rows = (t.cutoffTable||[]).map(r=>`<div class="list-line"><span>${r.label}</span><span style="font-weight:700;">${r.prec} 정밀도 · ${r.rec} 재현율</span></div>`).join('')
+    || '<div class="foot-note">Track A 컷오프표는 확인 필요 — 별도 산출표 미확보 상태예요.</div>';
+  return `
+  <div class="h1s">등급 · 최종판단</div>
+  <div class="p1s">${a.id} · ${a.grade}등급 · 상위 ${(100-a.pct).toFixed(1).replace(/\.0$/,'')}%</div>
+  <div class="card"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px;">등급별 컷오프 활용표</div>${rows}</div>
+  <div class="foot-note" style="margin:4px 0 14px;">점수 = 상대적 순위이며 확률이 아닙니다. 참고자료로만 활용하세요.</div>
+  <div style="font-size:13px;font-weight:700;margin-bottom:8px;">최종 판단</div>
+  <div class="decision-row">
+    <button class="decision-btn approve ${state.decision==='승인'?'sel':''}" onclick="setDecision('승인')">승인</button>
+    <button class="decision-btn hold ${state.decision==='보류'?'sel':''}" onclick="setDecision('보류')">보류</button>
+    <button class="decision-btn reject ${state.decision==='거절'?'sel':''}" onclick="setDecision('거절')">거절</button>
+  </div>
+`; }
+const OTHER_REVIEWERS = [
+  {n:'심사역 2', reason:'상환능력 관련 변수가 안정적이고, 결측·이상치가 없어 근거 신뢰도가 높다고 판단'},
+  {n:'심사역 3', reason:'컷오프 기준상 참고자료 요건은 충족하나, 소득 서류 확인 후 최종 확정을 권고'},
+];
+function screenE4(){
+  const t=T(); const a=t.applicants[state.examinerAppIdx];
+  if(state.submitted){
+    const others = OTHER_REVIEWERS.map(o=>{
+      const d = o===OTHER_REVIEWERS[0] ? (state.decision==='거절' ? '보류' : '승인') : (state.decision||'승인');
+      return `<div class="card"><div class="row-between"><span style="font-weight:700;font-size:13px;">${o.n}</span><span class="badge ${d==='승인'?'manage':'watch'}">${d}</span></div>
+        <div class="foot-note" style="margin-top:4px;">${o.reason}</div></div>`;
+    }).join('');
+    return `
+    <div class="h1s">완료 · 감사로그</div>
+    <div class="p1s">${a.id} · 내 판단: <b style="color:var(--ink)">${state.decision}</b> · ${state.examinerName}</div>
+    <div class="card tinted"><div style="font-weight:700;font-size:13px;margin-bottom:4px;">내 제출 내용</div>
+      <div class="foot-note" style="margin:0;">${state.examinerReason}</div></div>
+    <div style="font-size:13px;font-weight:700;margin:16px 0 8px;">다른 심사위원 의견</div>
+    ${others}
+    <div class="btn-row"><div class="btn btn-outline" onclick="printReport()">인쇄 · PDF 저장</div><div class="btn btn-primary" onclick="jump('e0')">다음 신청자</div></div>
+    <div class="btn btn-outline" style="margin-top:10px;" onclick="goLogin()">처음으로</div>
+    `;
+  }
+  return `
+  <div class="h1s">완료 · 감사로그</div>
+  <div class="p1s">${a.id} · 내 판단: <b style="color:var(--ink)">${state.decision||'미지정'}</b></div>
+  <div class="card tinted">이름과 판단 이유를 남기고 제출해야, 다른 심사위원들의 판단을 열람할 수 있어요. (블라인드 리뷰)</div>
+  <div style="font-size:12.5px;font-weight:700;margin:14px 0 6px;">심사자 이름</div>
+  <input id="examinerNameInput" type="text" placeholder="예: 홍길동" value="${state.examinerName}" class="ex-input">
+  <div style="font-size:12.5px;font-weight:700;margin:14px 0 6px;">이 판단을 내린 이유</div>
+  <textarea id="examinerReasonInput" placeholder="예: 근거 변수의 신뢰구간과 컷오프 기준을 종합해 판단했습니다" class="ex-input ex-textarea">${state.examinerReason}</textarea>
+  <button id="submitBtn" class="btn btn-primary" style="margin-top:14px;" disabled onclick="submitReview()">제출하고 다른 의견 보기</button>
+  <div class="btn btn-outline" style="margin-top:10px;" onclick="goLogin()">처음으로</div>
+`; }
+function wireE4Inputs(){
+  const nameEl = document.getElementById('examinerNameInput');
+  const reasonEl = document.getElementById('examinerReasonInput');
+  const btn = document.getElementById('submitBtn');
+  if(!nameEl || !btn) return;
+  function check(){
+    state.examinerName = nameEl.value;
+    state.examinerReason = reasonEl.value;
+    btn.disabled = !(nameEl.value.trim() && reasonEl.value.trim());
+  }
+  nameEl.addEventListener('input', check);
+  reasonEl.addEventListener('input', check);
+  check();
+}
+
+const E_RENDER = { e0:screenE0, e1:screenE1, e2:screenE2, e3:screenE3, e4:screenE4 };
+
+/* ================= NOTES ================= */
+const P_NOTES = {
+  p0:{tag:'P0 · 로그인', h:'본인인증', p:'회원가입 없이 휴대폰 본인인증만으로 조회를 시작한다. 심사자처럼 명단을 보여주지 않고, 실제 사용자 흐름과 동일하게 설계했다.'},
+  p1:{tag:'P1 · 교육', h:'문제 인식 · 신뢰 구축', p:'"위험해서가 아니라 정보가 없었을 뿐"이라는 메시지를 신뢰 지표로 뒷받침한다.'},
+  p2:{tag:'P2 · 온보딩', h:'동의 및 데이터 연동', p:'마이데이터 방식으로 필요한 정보만, 신용평가 목적에만 사용된다는 것을 명시한다.'},
+  p3:{tag:'P3 · 프로세싱', h:'분석 로딩', p:'실제 파이프라인(수집→분석→등급 산출)을 3단계로 단순화해 보여준다.'},
+  p4:{tag:'P4 · 핵심 화면', h:'결과 · 잠재등급 게이지', p:'동년배 등급 분포 위에 내 위치를 얹는 히스토그램 방식. 상대적 위치를 가장 정직하게 보여준다.'},
+  p5:{tag:'P5 · 설명가능성', h:'근거 설명', p:'실제 변수명을 그대로 노출하고, 전체 모집단 대비 백분위(미드랭크 방식)로 표기한다.'},
+  p6:{tag:'P6 · 리텐션', h:'개선 가이드', p:'컷오프 로직을 역이용해 "어떤 행동이 등급 상승에 유리한지" 사용자 언어로 제공한다.'},
+  p7:{tag:'P7 · 전환', h:'활용 · 리포트 전송', p:'진단 결과를 실제 심사에 연결하는 분기점. "참고자료"라는 원칙을 다시 한 번 명문화한다.'},
+  'p7-1a':{tag:'P7-1 · 은행', h:'은행 사전심사 안내', p:'대안등급으로 사전심사 조건을 먼저 비교하고, 신용조회 영향 없이 진행됨을 강조한다.'},
+  'p7-1b':{tag:'P7-1 · 은행', h:'은행 사전심사 조건', p:'대안등급 반영 시 예상 금리·한도는 확정 조건이 아니라 참고치임을 명시한다.'},
+  'p7-2a':{tag:'P7-2 · 보증재단', h:'보증서 안내', p:'재단이 보증을 서면 은행은 담보 없이 대출을 실행한다는 구조를 설명한다.'},
+  'p7-2b':{tag:'P7-2 · 보증재단', h:'보증 프로그램 매칭', p:'내 등급이 재단의 인정구간 안에 있는지 즉시 확인해준다.'},
+  'p7-3a':{tag:'P7-3 · 카드사', h:'첫 카드 발급 안내', p:'소득증빙 없이 대안등급만으로 첫카드 발급심사를 받을 수 있다는 점을 강조한다.'},
+  'p7-3b':{tag:'P7-3 · 카드사', h:'첫 카드 예상 조건', p:'첫 카드가 다음 신용이력을 만드는 시작점이라는 서비스의 선순환 구조를 보여준다.'},
+  p8:{tag:'P8 · 완료', h:'전송 완료', p:'개인 플로우의 마지막 화면. 여기서 바로 심사자 콘솔로 넘어가 같은 근거가 어떻게 보이는지 비교할 수 있다.'},
+};
+const E_NOTES = {
+  e0:{tag:'E0 · 대기열', h:'심사 대기열', p:'Track A/B 전환 가능, 각 트랙 9개 등급을 모두 포함하는 실제 데이터 기반 신청자 9명으로 구성.'},
+  e1:{tag:'E1 · 근거 변수', h:'대안변수 리포트', p:'개인 화면(P5)과 동일한 근거를 심사역용으로도 노출해 일관성을 확보한다.'},
+  e2:{tag:'E2 · 신뢰도', h:'근거·신뢰도 검증', p:'AUC 비교와 한계고지 체크박스 4개 — 4개를 모두 체크해야 다음 단계로 진행할 수 있도록 설계해 심사자가 한계를 인지하고 넘어가도록 한다.'},
+  e3:{tag:'E3 · 최종판단', h:'등급 · 최종판단', p:'등급 컷오프 기준표를 제공하고, 심사자가 승인/보류/거절 중 하나를 선택해 제출한다.'},
+  e4:{tag:'E4 · 감사로그', h:'완료 · 감사로그', p:'본인 판단을 제출해야 다른 심사위원들의 판단을 열람할 수 있는 블라인드 리뷰 구조.'},
+};
+
+/* ================= RENDER ================= */
+function renderRail(){
+  const railWrap = document.getElementById('railWrap');
+  if(state.flow==='login'){ railWrap.style.display='none'; return; }
+  railWrap.style.display='block';
+  const list = currentList();
+  document.getElementById('rail').innerHTML = list.map((s,i)=>`
+    <div class="chip ${i===state.screenIdx?'active':''}" onclick="jump('${s.id}')"><div class="n">${s.n}</div><div class="l">${s.l}</div></div>`).join('');
+  document.getElementById('progressFill').style.width = ((state.screenIdx+1)/list.length*100)+'%';
+}
+
+function render(){
+  document.getElementById('metaAuc').innerHTML = `모형 근거 <b>AUC ${T().auc}</b> · ${T().aucNote}`;
+  renderRail();
+
+  const stage = document.getElementById('stage');
+  if(state.flow==='login'){
+    clearLoadingTimer();
+    stage.innerHTML = renderLogin();
+    const tl = document.getElementById('trackToggleLogin');
+    if(tl) tl.addEventListener('click', e=>{ const b=e.target.closest('.mini-btn'); if(b) setTrack(b.dataset.track); });
+    return;
+  }
+  const list = currentList();
+  const cur = list[state.screenIdx];
+  const RENDER = state.flow==='examiner' ? E_RENDER : P_RENDER;
+  const NOTES = state.flow==='examiner' ? E_NOTES : P_NOTES;
+  const note = NOTES[cur.id];
+  stage.innerHTML = `
+    <div class="phone">
+      <div class="statusbar"><span>9:41</span><span class="icons">■■■ 📶 🔋</span></div>
+      <div class="screen">${RENDER[cur.id]()}</div>
+    </div>
+    <div class="note-panel">
+      <div class="tag">${note.tag}</div>
+      <h3>${note.h}</h3>
+      <p>${note.p}</p>
+      <div class="note-block">
+        <div class="h">보기 전환</div>
+        <div class="mini-toggle" id="trackToggleSide">
+          <button class="mini-btn ${state.track==='B'?'active':''}" data-track="B">Track B</button>
+          <button class="mini-btn ${state.track==='A'?'active':''}" data-track="A">Track A</button>
+        </div>
+        <div class="mini-toggle" id="flowToggleSide" style="margin-top:6px;">
+          <button class="mini-btn ${state.flow==='personal'?'active':''}" data-flow="personal">개인 플로우</button>
+          <button class="mini-btn ${state.flow==='examiner'?'active':''}" data-flow="examiner">심사자 콘솔</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+          <span style="font-size:11px;color:var(--ink-faint);">${T().label} · ${T().popLabel}</span>
+          <span class="side-link" onclick="goLogin()">처음으로</span>
+        </div>
+      </div>
+      ${state.flow==='personal' ? `
+      <div class="note-block"><div class="h">데모 신청자 미리보기</div>
+        <select id="demoAppSelect" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);font-size:12.5px;font-family:inherit;color:var(--ink);">
+          ${T().applicants.map((a,i)=>`<option value="${i}" ${i===state.personalAppIdx?'selected':''}>${a.id} · ${a.grade}등급 · 상위 ${(100-a.pct).toFixed(1).replace(/\.0$/,'')}%</option>`).join('')}
+        </select>
+        <div style="font-size:11px;color:var(--ink-faint);margin-top:6px;line-height:1.5;">실제 사용자 화면에는 노출되지 않는 프로토타입 전용 컨트롤이에요.</div>
+      </div>` : ''}
+      <div class="btn-row">
+        <div class="btn btn-outline" onclick="back()">← 이전</div>
+        <div class="btn btn-outline" onclick="advance()">다음 →</div>
+      </div>
+    </div>
+  `;
+  manageLoadingTimer(state.flow==='personal' ? cur.id : null);
+  if(state.flow==='examiner' && cur.id==='e4' && !state.submitted) wireE4Inputs();
+  if(state.flow==='personal'){
+    const sel = document.getElementById('demoAppSelect');
+    if(sel) sel.addEventListener('change', e=>{ state.personalAppIdx = parseInt(e.target.value); render(); });
+  }
+  const tt = document.getElementById('trackToggleSide');
+  if(tt) tt.addEventListener('click', e=>{ const b=e.target.closest('.mini-btn'); if(b) setTrack(b.dataset.track); });
+  const ft = document.getElementById('flowToggleSide');
+  if(ft) ft.addEventListener('click', e=>{ const b=e.target.closest('.mini-btn'); if(b) switchFlow(b.dataset.flow); });
+}
+
+render();
+</script>
+</body>
+</html>
